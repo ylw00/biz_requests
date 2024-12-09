@@ -7,6 +7,7 @@
 # import os
 from requests import Session
 from requests.adapters import HTTPAdapter
+from hyper import HTTP20Adapter
 from typing import Optional
 from dataclasses import dataclass, field
 
