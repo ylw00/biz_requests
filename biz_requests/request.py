@@ -5,8 +5,8 @@
 # @desc:
 # import sys
 # import os
-from requests.adapters import HTTPAdapter
 import requests as d_requests
+from requests.adapters import HTTPAdapter
 from typing import Optional, Any, Union
 from dataclasses import dataclass, field
 

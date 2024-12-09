@@ -108,7 +108,7 @@ def extract_cookies_to_jar(jar, request, response):
     """Extract the cookies from the response into a CookieJar.
 
     :param jar: cookielib.CookieJar (not necessarily a RequestsCookieJar)
-    :param request: our own requests.Request object
+    :param request: our own biz_requests.Request object
     :param response: urllib3.HTTPResponse object
     """
     _original_response = getattr(response, '_original_response')

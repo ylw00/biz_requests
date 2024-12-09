@@ -9,7 +9,7 @@ from collections import OrderedDict
 from typing import Optional
 
 
-# from requests.structures import CaseInsensitiveDict
+# from biz_requests.structures import CaseInsensitiveDict
 
 
 # F_PATH = os.path.dirname(__file__)

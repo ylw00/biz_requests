@@ -94,8 +94,8 @@ class Response(DResponse):
 
 
 if __name__ == '__main__':
-    from requests.adapters import HTTPAdapter
-    import requests
+    from biz_requests.adapters import HTTPAdapter
+    import biz_requests
 
 
     def demo():
@@ -105,7 +105,7 @@ if __name__ == '__main__':
                 response = Response(req, resp)
                 return response
 
-        session = requests.Session()
+        session = biz_requests.Session()
         session.mount('http://', CustomAdapter())  # 为 http 请求安装自定义适配器
         session.mount('https://', CustomAdapter())  # 为 https 请求安装自定义适配器
 
