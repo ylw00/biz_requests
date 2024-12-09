@@ -7,13 +7,12 @@
 # import os
 from requests import Session
 from requests.adapters import HTTPAdapter
-from typing import Optional, Any, Union
+from typing import Optional
 from dataclasses import dataclass, field
 
 from headers import Headers
 from response import Response
-from params import Method, Params
-from wrapper import Wrapper
+from params import Method, RequestParams
 
 
 # F_PATH = os.path.dirname(__file__)
@@ -41,64 +40,55 @@ class CustomAdapter(HTTPAdapter):
         return response
 
 
-class Requests:
+class Request:
+    RP = RequestParams
+    M = Method
+
     def __init__(self):
         self.__config: Optional[Config] = None
         self.headers: Optional[Headers] = None
         self.session: Optional[Session] = None
 
-        self.reset_session({'a': '1'})
+        self.reset_session()
 
     def reset_session(self, headers: Optional[dict] = None):
         if isinstance(self.session, Session):
             self.session.close()
 
         self.session = Session()
-        self.session.headers = self.headers = Headers(headers or self.__config.headers)
+        self.session.headers = self.headers = Headers(headers)
 
         # 自定义适配器
         self.session.mount('http://', CustomAdapter())
         self.session.mount('https://', CustomAdapter())
 
-    def request(self, params_c: Params) -> Response:
-        # if method not in Method:
-        #     raise ValueError(f"Invalid method: `{method}`")
+    def request(self, p: RequestParams) -> Response:
+        method = p.method
+        if method not in Method:
+            raise ValueError(f"Invalid method: `{method}`")
         with self.session.request(
-                params_c.get_method().value,
-                params_c.get_url(),
-                params=params_c.get_params(),
-                data=params_c.get_data(),
-                json=params_c.get_json(),
-                headers=params_c.get_headers(),
-                cookies=params_c.get_cookies(),
-                timeout=params_c.get_timeout()
+                method.value, p.url, params=p.params, data=p.data, json=p.json, headers=p.headers,
+                cookies=p.cookies, timeout=p.timeout, verify=p.verify, allow_redirects=p.allow_redirects
         ) as response:
             response: Response = response
             return response
 
-    def get(self, params_c: Params):
-        params_c.set_method(Method.get)
-        return self.request(params_c)
+    def get(self, p: RequestParams):
+        p.method = Method.get
+        return self.request(p)
 
-    def post(self, params_c: Params):
-        params_c.set_method(Method.post)
-        return self.request(params_c)
-
-
+    def post(self, p: RequestParams):
+        p.method = Method.post
+        return self.request(p)
 
 
 if __name__ == '__main__':
     def demo():
-        requests = Requests()
+        requests = Request()
 
-        _ = requests.post('https://www.baidu.com', headers={
-            "accept": "application/json, text/plain, */*",
-            "accept-language": "zh-CN,zh;q=0.9",
-            "content-type": "application/json;charset=UTF-8",
-            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
-        })
-        a = _.headers
-        b = _.jsonp2json
+        _ = requests.post(requests.RP(None, 'http://www.baidu.com', headers={
+
+        })).dataframe()
 
 
     demo()

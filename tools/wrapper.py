@@ -61,27 +61,19 @@ class Wrapper:
         return decorator
 
     @staticmethod
-    def save_error_log(error_types: Optional[tuple] = None):
-        """
-        捕获自定义错误, 保存日志并抛出错误
-        :error_types: tuple 目标错误
-        """
-        error_types = error_types or (Exception,)
+    def save_resp_error(func):
 
-        def decorator(func):
-            @wraps(func)
-            def wrapper(*args, **kwargs):
-                try:
-                    result = func(*args, **kwargs)
-                except error_types as e:
-                    logger.info(f"func_name : {func.__name__} , args : {args} , kwargs : {kwargs}")
-                    raise e
-                else:
-                    return result
+        @wraps(func)
+        def wrapper(self, *args, **kwargs):
+            try:
+                result = func(self, *args, **kwargs)
+            except Exception as e:
+                logger.info(f"func_name : {func.__name__}; - Text: {self.text};")
+                raise e
+            else:
+                return result
 
-            return cast(Wrapper.F, wrapper)
-
-        return decorator
+        return cast(Wrapper.F, wrapper)
 
 
 if __name__ == '__main__':

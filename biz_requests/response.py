@@ -6,13 +6,13 @@
 # import sys
 # import os
 import pandas as pd
-from typing import Any
 from requests.models import Response as DResponse
 from json import loads as json_loads
+from typing import Optional
 
-from wrapper import Wrapper
 from headers import Headers
 from cookie import extract_cookies_to_jar
+from tools.wrapper import Wrapper
 
 
 # F_PATH = os.path.dirname(__file__)
@@ -76,26 +76,32 @@ class Response(DResponse):
         self.connection = self
 
         self.__debugger = debugger
+        self.__text: Optional[str] = None
 
     @property
     def text(self) -> str:
-        return super(Response, self).text
+        if not hasattr(self, '__text'):
+            self.__text = super().text
+        return self.__text
 
-    def json(self, *args, **kwargs) -> Any:
+    @Wrapper.save_resp_error
+    def json(self, *args, **kwargs) -> dict:
         return super(Response, self).json()
 
     @property
-    def jsonp2json(self):
+    @Wrapper.save_resp_error
+    def jsonp2json(self) -> dict:
         _text = self.text
-        return json_loads(self.text[_text.find('{'):_text.rfind('}') + 1])
+        return json_loads(_text[_text.find('{'):_text.rfind('}') + 1])
 
-    def dataframe(self, *args, **kwargs):
+    @Wrapper.save_resp_error
+    def dataframe(self, *args, **kwargs) -> pd.DataFrame:
         return pd.DataFrame(self.content, *args, **kwargs)
 
 
 if __name__ == '__main__':
-    from biz_requests.adapters import HTTPAdapter
-    import biz_requests
+    from requests.adapters import HTTPAdapter
+    import requests
 
 
     def demo():
@@ -105,7 +111,7 @@ if __name__ == '__main__':
                 response = Response(req, resp)
                 return response
 
-        session = biz_requests.Session()
+        session = requests.Session()
         session.mount('http://', CustomAdapter())  # 为 http 请求安装自定义适配器
         session.mount('https://', CustomAdapter())  # 为 https 请求安装自定义适配器
 
