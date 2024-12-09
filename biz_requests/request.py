@@ -5,7 +5,7 @@
 # @desc:
 # import sys
 # import os
-import requests as d_requests
+from requests import Session
 from requests.adapters import HTTPAdapter
 from typing import Optional, Any, Union
 from dataclasses import dataclass, field
@@ -45,12 +45,15 @@ class Requests:
     def __init__(self):
         self.__config: Optional[Config] = None
         self.headers: Optional[Headers] = None
-        self.session: Optional[d_requests.Session] = None
+        self.session: Optional[Session] = None
 
         self.reset_session({'a': '1'})
 
     def reset_session(self, headers: Optional[dict] = None):
-        self.session = d_requests.Session()
+        if isinstance(self.session, Session):
+            self.session.close()
+
+        self.session = Session()
         self.session.headers = self.headers = Headers(headers or self.__config.headers)
 
         # 自定义适配器
