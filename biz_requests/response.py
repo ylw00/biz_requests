@@ -98,6 +98,9 @@ class Response(DResponse):
     def dataframe(self, *args, **kwargs) -> pd.DataFrame:
         return pd.DataFrame(self.content, *args, **kwargs)
 
+    def callback_parse(self):
+        ...
+
 
 if __name__ == '__main__':
     from requests.adapters import HTTPAdapter
