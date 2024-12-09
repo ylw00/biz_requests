@@ -9,6 +9,7 @@ import time
 import traceback
 from functools import wraps
 from typing import cast, Optional, TypeVar, Callable, Any
+from loguru import logger
 
 
 # F_PATH = os.path.dirname(__file__)
