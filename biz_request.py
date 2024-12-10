@@ -5,15 +5,18 @@
 # @desc:
 # import sys
 # import os
+import inspect
 from typing import Optional, Callable
+
+from request import Session, RequestConfig
+from db_engine import Engine, EngineConfig
+
+from tools.wrapper import Wrapper, is_instance_method
+
 
 # F_PATH = os.path.dirname(__file__)
 # sys.path.append(os.path.join(F_PATH, '..'))
 # sys.path.append(os.path.join(F_PATH, '../..'))
-from request import Session, RequestConfig
-from db_engine import Engine, EngineConfig
-
-from tools.wrapper import Wrapper
 
 
 class Request:
@@ -43,19 +46,10 @@ class BizRequest(Request):
     def loop_page(self):
         ...
 
-    def safe_parse(self, callback_func: Callable, *args, **kwargs):
-        return Wrapper.save_resp_error(callback_func)(self, *args, **kwargs)
+    @staticmethod
+    def safe_parse(callback_func: Callable, *args, **kwargs):
+        return Wrapper.save_resp_error(callback_func)(*args, **kwargs)
 
 
 if __name__ == '__main__':
-    def demo():
-        class Tm(BizRequest):
-            def __init__(self):
-                super(Tm, self).__init__()
-                self.init_request().init_engine()
-
-            def crawl_response(self):
-                self.request.get('', headers={}).json()
-
-
-    demo()
+    ...

@@ -17,6 +17,15 @@ from loguru import logger
 # sys.path.append(os.path.join(F_PATH, '..'))
 # sys.path.append(os.path.join(F_PATH, '../..'))
 
+def is_instance_method(func):
+    """
+    判断回调函数是否是实例方法
+    :param func: 待检查的回调函数
+    :return: 如果是实例方法则返回 True，否则返回 False
+    """
+    return hasattr(func, '__self__') and func.__self__ is not None
+
+
 class Wrapper:
     F = TypeVar('F', bound=Callable[..., Optional[Any]])
 
@@ -72,7 +81,7 @@ class Wrapper:
         return decorator
 
     @staticmethod
-    def save_resp_error(func):
+    def save_req_error(func):
 
         @wraps(func)
         def wrapper(self, *args, **kwargs):
@@ -80,6 +89,21 @@ class Wrapper:
                 result = func(self, *args, **kwargs)
             except Exception as e:
                 logger.info(f"func_name : {func.__name__}; - Text: {self.text};")
+                raise e
+            else:
+                return result
+
+        return cast(Wrapper.F, wrapper)
+
+    @staticmethod
+    def save_resp_error(func):
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            try:
+                result = func(*args, **kwargs)
+            except Exception as e:
+                logger.info(f"func_name : {func.__name__}; - args: {args}; - kwargs: {kwargs}")
                 raise e
             else:
                 return result

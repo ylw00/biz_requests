@@ -9,10 +9,10 @@ from requests import Session as RSession
 from typing import Optional
 from dataclasses import dataclass, field
 
-from http1 import CustomAdapterHtt1  # , CustomAdapterHtt2
-from headers import Headers
-from response import Response
-from params import MethodEnum, RequestParams
+from .http1 import CustomAdapterHtt1  # , CustomAdapterHtt2
+from .headers import Headers
+from .response import Response
+from .params import MethodEnum, RequestParams
 
 
 @dataclass

@@ -12,7 +12,7 @@ from requests.models import Response as RResponse
 from requests.utils import get_encoding_from_headers
 from requests.cookies import extract_cookies_to_jar
 
-from headers import Headers
+from .headers import Headers
 from tools.wrapper import Wrapper
 from tools.cookies import cookie_str2dict
 from tools.dataframe import Content2DfParamsConfig, content2df
@@ -48,17 +48,17 @@ class Response(RResponse):
             self.__text = super().text
         return self.__text
 
-    @Wrapper.save_resp_error
+    @Wrapper.save_req_error
     def json(self, *args, **kwargs) -> dict:
         return super(Response, self).json()
 
     @property
-    @Wrapper.save_resp_error
+    @Wrapper.save_req_error
     def jsonp2json(self) -> dict:
         _text = self.text
         return json_loads(_text[_text.find('{'):_text.rfind('}') + 1])
 
-    @Wrapper.save_resp_error
+    @Wrapper.save_req_error
     def dataframe(self, c_type: str, **kwargs) -> pd.DataFrame:
         """
         :param c_type: ContentTypeEnum

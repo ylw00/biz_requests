@@ -15,7 +15,7 @@ from sqlalchemy import __version__ as sqlalchemy_version
 from sqlalchemy.engine.base import Engine
 from sqlalchemy.engine import Connection
 
-from switch_db import SwitchDB
+from .switch_db import SwitchDB
 
 # F_PATH = os.path.dirname(__file__)
 # sys.path.append(os.path.join(F_PATH, '..'))

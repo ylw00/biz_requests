@@ -17,7 +17,8 @@ class Tm(BizRequest):
         super(Tm, self).__init__()
         self.init_request()
 
-    def parse_respone(self, response_j: dict):
+    @staticmethod
+    def parse_respone(response_j: dict):
         response_j['aaa']
 
     def crawl_response(self):

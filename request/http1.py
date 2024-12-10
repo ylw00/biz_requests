@@ -6,9 +6,11 @@
 # import sys
 # import os
 from requests.adapters import HTTPAdapter
-from response import ResponseSetAttr
+# from hyper.contrib import HTTP20Adapter
 
-from hyper.contrib import HTTP20Adapter
+from .response import ResponseSetAttr
+
+
 # from hyper_development.hyper.contrib import HTTP20Adapter
 
 
@@ -47,24 +49,24 @@ class FakeOriginalResponse(object):  # pragma: no cover
         return self.get_all(name, [])
 
 
-class CustomAdapterHtt2(HTTP20Adapter):
-    def __init__(self, debugger: bool = True):
-        super(CustomAdapterHtt2, self).__init__()
-        self.__debugger = debugger
-
-    def build_response(self, request, resp):
-        response = ResponseSetAttr(self, request, resp)
-        response.__debugger = self.__debugger
-
-        resp.release_conn = lambda: None
-
-        response.raw._original_response = orig = FakeOriginalResponse(None)
-        orig.version = 20
-        orig.status = resp.status
-        orig.reason = resp.reason
-        orig.msg = FakeOriginalResponse(resp.headers.iter_raw())
-
-        return response
+# class CustomAdapterHtt2(HTTP20Adapter):
+#     def __init__(self, debugger: bool = True):
+#         super(CustomAdapterHtt2, self).__init__()
+#         self.__debugger = debugger
+#
+#     def build_response(self, request, resp):
+#         response = ResponseSetAttr(self, request, resp)
+#         response.__debugger = self.__debugger
+#
+#         resp.release_conn = lambda: None
+#
+#         response.raw._original_response = orig = FakeOriginalResponse(None)
+#         orig.version = 20
+#         orig.status = resp.status
+#         orig.reason = resp.reason
+#         orig.msg = FakeOriginalResponse(resp.headers.iter_raw())
+#
+#         return response
 
 
 if __name__ == '__main__':

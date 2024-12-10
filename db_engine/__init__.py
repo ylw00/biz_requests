@@ -10,8 +10,8 @@
 # sys.path.append(os.path.join(F_PATH, '..'))
 # sys.path.append(os.path.join(F_PATH, '../..'))
 
-from engine import Engine
-from engine_base import EngineConfig
+from .engine import Engine
+from .engine_base import EngineConfig
 
 if __name__ == '__main__':
     pass
