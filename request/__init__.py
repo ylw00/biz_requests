@@ -10,7 +10,7 @@
 # sys.path.append(os.path.join(F_PATH, '..'))
 # sys.path.append(os.path.join(F_PATH, '../..'))
 from session import RequestConfig, Session
-from response import ContentTypeEnum, Content2DfParamsConfig, content2df
+from response import Content2DfParamsConfig, content2df
 from params import MethodEnum
 
 
@@ -18,7 +18,6 @@ __all__ = [
     'Session',
     'RequestConfig',
     'MethodEnum',
-    'ContentTypeEnum',
     'Content2DfParamsConfig',
     'content2df',
 ]

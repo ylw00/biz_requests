@@ -5,13 +5,15 @@
 # @desc:
 # import sys
 # import os
-from typing import Optional
+from typing import Optional, Callable
 
 # F_PATH = os.path.dirname(__file__)
 # sys.path.append(os.path.join(F_PATH, '..'))
 # sys.path.append(os.path.join(F_PATH, '../..'))
 from request import Session, RequestConfig, MethodEnum
 from db_engine import Engine, EngineConfig
+
+from tools.wrapper import Wrapper
 
 
 class Request:
@@ -34,13 +36,15 @@ class Request:
 
 class BizRequest(Request):
     def __init__(self):
+        if type(self) is BizRequest:
+            raise TypeError("BizRequest cannot be instantiated directly.")
         super(BizRequest, self).__init__()
 
-    def lopp_page(self):
+    def loop_page(self):
         ...
 
-    def safe_parse(self):
-        ...
+    def safe_parse(self, callback_func: Callable, *args, **kwargs):
+        return Wrapper.save_resp_error(callback_func)(self, *args, **kwargs)
 
 
 if __name__ == '__main__':
