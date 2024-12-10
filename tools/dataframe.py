@@ -17,10 +17,6 @@ from typing import Union, List, Dict
 from tools.wrapper import Wrapper
 
 
-# F_PATH = os.path.dirname(__file__)
-# sys.path.append(os.path.join(F_PATH, '..'))
-# sys.path.append(os.path.join(F_PATH, '../..'))
-
 class ContentType(Enum):
     xlsx_content = 'xlsx_content'
     xlsx_zip = 'xlsx_zip'
@@ -29,10 +25,6 @@ class ContentType(Enum):
     csv_content = 'csv_content'
     csv_zip = 'csv_zip'
     csv_base64 = 'csv_base64'
-
-
-# class ContentEncoding(Enum):
-#     ...
 
 
 @dataclass
@@ -64,9 +56,6 @@ def non2None(df: DataFrame, *, fields: str = None) -> DataFrame:
 
 
 class Content2DataFrame:
-    def __init__(self, non2none: bool = False):
-        self._non2none = non2none
-
     @staticmethod
     def _parse_base64(content: str) -> bytes:
         """将 Base64 编码的内容解码为字节流"""
@@ -169,4 +158,8 @@ class Content2DataFrame:
 
 
 if __name__ == '__main__':
-    print(**Content2DataframeParams())
+    def run_func():
+        cd = Content2DataFrame()
+
+
+    run_func()
