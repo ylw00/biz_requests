@@ -11,7 +11,7 @@ from typing import Optional, Callable
 from request import Session, RequestConfig
 from db_engine import Engine, EngineConfig
 
-from tools.wrapper import Wrapper, is_instance_method
+from tools.wrapper import Wrapper
 
 
 # F_PATH = os.path.dirname(__file__)

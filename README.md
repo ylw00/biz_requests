@@ -4,9 +4,10 @@
 ## 新增方法
 
 ```python
-from biz_request import Request
+from biz_request import BizRequest
 
-biz_req = Request()
+# 注意, 该类只能继承使用
+biz_req = BizRequest()
 biz_req.init_engine(**{
     # 初始化数据库
 }).init_request(**{
