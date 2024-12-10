@@ -48,7 +48,6 @@ class Response(RResponse):
         self.__text = None
         return self
 
-    @property
     def text(self) -> str:
         if not hasattr(self, '__text'):
             self.__text = super().text
@@ -58,10 +57,9 @@ class Response(RResponse):
     def json(self, *args, **kwargs) -> dict:
         return super(Response, self).json()
 
-    @property
     @Wrapper.save_req_error
     def jsonp2json(self) -> dict:
-        _text = self.text
+        _text = self.text()
         return json_loads(_text[_text.find('{'):_text.rfind('}') + 1])
 
     @Wrapper.save_req_error

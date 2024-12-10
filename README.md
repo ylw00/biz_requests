@@ -25,6 +25,10 @@ class Demo(BizRequest):
         self.request.get('', headers={}).dataframe()  # 返回 pd.Dataframe 类型
 
         # 这两个不会有报错日志
-        self.request.get('', headers={}).set_encoding()  # 设置响应编码, 并返回self
+        req = self.request.get('', headers={})
+        req.set_encoding()  # 设置响应编码, 并重新获取
+        req.set_encoding('utf-8').json()
+        req.set_encoding('utf-8').text()
+        
         self.request.get('', headers={}).resp_cookie()  # 获取到response.set_cookie
 ```
