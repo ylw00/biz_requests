@@ -86,12 +86,10 @@ class Wrapper:
         @wraps(func)
         def wrapper(self, *args, **kwargs):
             try:
-                result = func(self, *args, **kwargs)
+                return func(self, *args, **kwargs)
             except Exception as e:
                 logger.info(f"func_name : {func.__name__}; - Text: {self.text};")
                 raise e
-            else:
-                return result
 
         return cast(Wrapper.F, wrapper)
 
@@ -101,12 +99,10 @@ class Wrapper:
         @wraps(func)
         def wrapper(*args, **kwargs):
             try:
-                result = func(*args, **kwargs)
+                return func(*args, **kwargs)
             except Exception as e:
                 logger.info(f"func_name: {func.__name__}; - args: {args}; - kwargs: {kwargs}")
                 raise e
-            else:
-                return result
 
         return cast(Wrapper.F, wrapper)
 
