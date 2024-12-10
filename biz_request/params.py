@@ -14,7 +14,7 @@ from typing import Union, Optional, Dict, Tuple
 # sys.path.append(os.path.join(F_PATH, '..'))
 # sys.path.append(os.path.join(F_PATH, '../..'))
 
-class Method(Enum):
+class MethodEnum(Enum):
     POST = 'POST'
     GET = 'GET'
     PUT = 'PUT'
@@ -29,7 +29,7 @@ class Method(Enum):
 
 @dataclass
 class RequestParams:
-    method: Optional[Method] = None
+    method: Optional[MethodEnum] = None
     url: Optional[str] = None
     headers: Optional[Dict[str, str]] = None
     params: Optional[Union[Dict, bytes]] = None
@@ -47,8 +47,10 @@ class RequestParams:
 
 
 if __name__ == '__main__':
-    # print(Params().set_url().set_timeout())
+    def demo():
+        aa = RequestParams()
+        aa.method = 111
+        print(aa.method)
 
-    aa = RequestParams()
-    aa.method = 111
-    print(aa.method)
+
+    demo()

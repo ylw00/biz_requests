@@ -6,7 +6,7 @@
 # import sys
 # import os
 from requests.adapters import HTTPAdapter
-from response import ResponseSetAttr
+from biz_response import ResponseSetAttr
 
 from hyper.contrib import HTTP20Adapter
 # from hyper_development.hyper.contrib import HTTP20Adapter

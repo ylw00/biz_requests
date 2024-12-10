@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 # @author: ylw
-# @file: request
+# @file: biz_session
 # @time: 2024/12/9
 # @desc:
 # import sys
@@ -9,14 +9,14 @@ from requests import Session
 from typing import Optional
 from dataclasses import dataclass, field
 
-from biz_http import CustomAdapterHtt1, CustomAdapterHtt2
+from biz_http import CustomAdapterHtt1  # , CustomAdapterHtt2
 from headers import Headers
-from response import Response
-from params import Method, RequestParams
+from biz_response import BizResponse
+from params import MethodEnum, RequestParams
 
 
 @dataclass
-class Config:
+class RequestConfig:
     init_engine: bool = field(default=True)  # 初始化引擎
     dbname: str = field(default=None)  # 数据库名称
     retries: int = field(default=0)  # 请求重试次数
@@ -26,13 +26,13 @@ class Config:
     http2: bool = field(default=False)  # 是否使用http2
 
 
-class Request:
+class BizSession:
     RP = RequestParams
-    M = Method
-    C = Config
+    M = MethodEnum
+    RC = RequestConfig
 
-    def __init__(self, config: Optional[Config] = None):
-        self.__config = config or Config()
+    def __init__(self, config: Optional[RequestConfig] = None):
+        self.__config = config or RequestConfig()
 
         self.headers: Optional[Headers] = None
         self.session: Optional[Session] = None
@@ -50,29 +50,29 @@ class Request:
         self.session.mount('http://', CustomAdapterHtt1())
         self.session.mount('https://', CustomAdapterHtt1())
 
-    def request(self, p: RequestParams) -> Response:
+    def request(self, p: RequestParams) -> BizResponse:
         method = p.method
-        if method not in Method:
+        if method not in MethodEnum:
             raise ValueError(f"Invalid method: `{method}`")
         with self.session.request(
                 method.value, p.url, params=p.params, data=p.data, json=p.json, headers=p.headers,
                 cookies=p.cookies, timeout=p.timeout, verify=p.verify, allow_redirects=p.allow_redirects
         ) as response:
-            response: Response = response
+            response: BizResponse = response
             return response
 
     def get(self, p: RequestParams):
-        p.method = Method.get
+        p.method = MethodEnum.get
         return self.request(p)
 
     def post(self, p: RequestParams):
-        p.method = Method.post
+        p.method = MethodEnum.post
         return self.request(p)
 
 
 if __name__ == '__main__':
     def demo():
-        requests = Request(Request.C())
+        requests = BizSession(BizSession.C())
 
         _ = requests.get(requests.RP(None, "https://spa16.scrape.center/", headers={
             'accept': 'application/json, text/plain, */*',

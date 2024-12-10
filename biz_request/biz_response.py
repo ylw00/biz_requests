@@ -7,15 +7,15 @@
 # import os
 import pandas as pd
 from json import loads as json_loads
-from typing import Optional, Union, Callable
-from requests.models import Response as DResponse
+from typing import Optional, Union
+from requests.models import Response
 from requests.utils import get_encoding_from_headers
 from requests.cookies import extract_cookies_to_jar
 
 from headers import Headers
 from tools.wrapper import Wrapper
 from tools.cookies import cookie_str2dict
-from tools.dataframe import ContentType, Content2DfParams, content2df
+from tools.dataframe import ContentTypeEnum, Content2DfParamsConfig, content2df
 
 
 # F_PATH = os.path.dirname(__file__)
@@ -23,11 +23,11 @@ from tools.dataframe import ContentType, Content2DfParams, content2df
 # sys.path.append(os.path.join(F_PATH, '../..'))
 
 
-class Response(DResponse):
+class BizResponse(Response):
     headers: Optional[Headers] = None
 
     def __init__(self, debugger: bool = False):
-        super(Response, self).__init__()
+        super(BizResponse, self).__init__()
         self.__debugger = debugger
         self.__text: Optional[str] = None
 
@@ -45,7 +45,7 @@ class Response(DResponse):
 
     @Wrapper.save_resp_error
     def json(self, *args, **kwargs) -> dict:
-        return super(Response, self).json()
+        return super(BizResponse, self).json()
 
     @property
     @Wrapper.save_resp_error
@@ -54,8 +54,8 @@ class Response(DResponse):
         return json_loads(_text[_text.find('{'):_text.rfind('}') + 1])
 
     @Wrapper.save_resp_error
-    def dataframe(self, c_type: ContentType, **kwargs) -> pd.DataFrame:
-        return content2df(c_type, self.content, Content2DfParams(
+    def df(self, c_type: ContentTypeEnum, **kwargs) -> pd.DataFrame:
+        return content2df(c_type, self.content, Content2DfParamsConfig(
             c_type=c_type,
             content=self.content,
             encoding=kwargs.get('encoding', 'utf-8'),
@@ -67,8 +67,8 @@ class Response(DResponse):
         ))
 
 
-def ResponseSetAttr(self, req, resp) -> Response:
-    response = Response()
+def ResponseSetAttr(self, req, resp) -> BizResponse:
+    response = BizResponse()
 
     response.status_code = getattr(resp, "status", None)
     response.headers = Headers({k.decode(): v.decode() for k, v in getattr(resp, "headers", {}).items()})

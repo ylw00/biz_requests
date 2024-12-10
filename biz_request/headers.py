@@ -67,4 +67,8 @@ class Headers(OrderedDict):
 
 
 if __name__ == '__main__':
-    Headers().copy()
+    def demo():
+        Headers().copy()
+
+
+    demo()

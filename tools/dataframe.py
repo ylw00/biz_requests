@@ -19,7 +19,7 @@ from tools.wrapper import Wrapper
 content_2_df: 'Content2df'
 
 
-class ContentType(Enum):
+class ContentTypeEnum(Enum):
     xlsx_content = 'xlsx_content'
     xlsx_zip = 'xlsx_zip'
     xlsx_base64 = 'xlsx_base64'
@@ -30,8 +30,8 @@ class ContentType(Enum):
 
 
 @dataclass
-class Content2DfParams:
-    c_type: ContentType = field(default=None)  # content 类型
+class Content2DfParamsConfig:
+    c_type: ContentTypeEnum = field(default=None)  # content 类型
     content: Union[bytes, str] = field(default=b'')
     encoding: Union[str, List[str]] = field(default='utf-8')
     dtype: Union[dict] = field(default=None)
@@ -128,7 +128,7 @@ class Content2df:
         ])
 
 
-def content2df(c_type: ContentType, content: Union[bytes, str], p: Content2DfParams, **kwargs) -> DataFrame:
+def content2df(c_type: ContentTypeEnum, content: Union[bytes, str], p: Content2DfParamsConfig, **kwargs) -> DataFrame:
     """根据 ContentType 转换内容为 DataFrame"""
     global content_2_df
     content_2_df = content_2_df or Content2df()
@@ -139,22 +139,22 @@ def content2df(c_type: ContentType, content: Union[bytes, str], p: Content2DfPar
     file_name = p.file_name
 
     # 根据 content_type 调用相应的处理函数
-    if c_type == ContentType.xlsx_content:
+    if c_type == ContentTypeEnum.xlsx_content:
         return content_2_df.xlsx_content(content, sheet_name, header, engine, **kwargs)
 
-    if c_type == ContentType.xlsx_base64:
+    if c_type == ContentTypeEnum.xlsx_base64:
         return content_2_df.xlsx_base64(content, sheet_name, header, engine, **kwargs)
 
-    if c_type == ContentType.xlsx_zip:
+    if c_type == ContentTypeEnum.xlsx_zip:
         return content_2_df.xlsx_zip(content, file_name, sheet_name, header, engine, **kwargs)
 
-    if c_type == ContentType.csv_content:
+    if c_type == ContentTypeEnum.csv_content:
         return content_2_df.csv_content(content, sheet_name, header, encoding, engine, **kwargs)
 
-    if c_type == ContentType.csv_base64:
+    if c_type == ContentTypeEnum.csv_base64:
         return content_2_df.csv_base64(content, sheet_name, header, encoding, engine, **kwargs)
 
-    if c_type == ContentType.csv_zip:
+    if c_type == ContentTypeEnum.csv_zip:
         return content_2_df.csv_zip(content, file_name, sheet_name, header, encoding, engine, **kwargs)
 
     raise ValueError(f"Unsupported content type: {c_type}")
@@ -163,7 +163,7 @@ def content2df(c_type: ContentType, content: Union[bytes, str], p: Content2DfPar
 if __name__ == '__main__':
     def run_func(**kwargs):
 
-        cdp = Content2DfParams(header=kwargs.get('header'))
+        cdp = Content2DfParamsConfig(header=kwargs.get('header'))
         print(cdp)
 
     run_func()

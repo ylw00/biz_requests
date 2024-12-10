@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 # @author: ylw
-# @file: __init__.py
-# @time: 2024/12/9
+# @file: biz_request
+# @time: 2024/12/10
 # @desc:
 # import sys
 # import os
@@ -10,8 +10,9 @@
 # sys.path.append(os.path.join(F_PATH, '..'))
 # sys.path.append(os.path.join(F_PATH, '../..'))
 
-from engine import Engine
-from engine_base import EngineConfig
+class BizRequest:
+    def __init__(self):
+        ...
 
 if __name__ == '__main__':
     pass
