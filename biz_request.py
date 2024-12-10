@@ -10,7 +10,7 @@ from typing import Optional, Callable
 # F_PATH = os.path.dirname(__file__)
 # sys.path.append(os.path.join(F_PATH, '..'))
 # sys.path.append(os.path.join(F_PATH, '../..'))
-from request import Session, RequestConfig, MethodEnum
+from request import Session, RequestConfig
 from db_engine import Engine, EngineConfig
 
 from tools.wrapper import Wrapper
