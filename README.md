@@ -7,21 +7,24 @@
 from biz_request import BizRequest
 
 # 注意, 该类只能继承使用
-biz_req = BizRequest()
-biz_req.init_engine(**{
-    # 初始化数据库
-}).init_request(**{
-    # 初始化请求
-})
 
-# 错误日志打印
-# 以下几个方法执行报错的时候会自动日志输出 biz_req.text
+class Demo(BizRequest):
+    def __init__(self):
+        super(Demo, self).__init__()
+        self.init_request(
+            # 初始化请求
+        ).init_engine(
+            # 初始化数据库
+        )
 
-biz_req.request.get('', headers={}).json()
-biz_req.request.get('', headers={}).jsonp2json()
-biz_req.request.get('', headers={}).dataframe()
+    def demo(self):
+        # 错误日志打印
+        # 以下几个方法执行报错的时候会自动日志输出 biz_req.text
+        self.request.get('', headers={}).json()
+        self.request.get('', headers={}).jsonp2json()
+        self.request.get('', headers={}).dataframe()  # 返回 pd.Dataframe 类型
 
-# 这两个不会有报错日志
-biz_req.request.get('', headers={}).set_encoding()  # 设置响应编码, 并返回self
-biz_req.request.get('', headers={}).resp_cookie()  # 获取到response.set_cookie
+        # 这两个不会有报错日志
+        self.request.get('', headers={}).set_encoding()  # 设置响应编码, 并返回self
+        self.request.get('', headers={}).resp_cookie()  # 获取到response.set_cookie
 ```
