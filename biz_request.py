@@ -38,6 +38,9 @@ class Request:
 
 
 class BizRequest(Request):
+    """
+    在这里拓展业务代码/封装
+    """
     def __init__(self):
         if type(self) is BizRequest:
             raise TypeError("BizRequest cannot be instantiated directly.")

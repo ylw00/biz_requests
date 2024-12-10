@@ -27,6 +27,9 @@ def decode_bytes(value):
 
 
 class Response(RResponse):
+    """
+    在这里拓展返回数据类型/封装
+    """
     headers: Optional[Headers] = None
 
     def __init__(self, debugger: bool = False):
