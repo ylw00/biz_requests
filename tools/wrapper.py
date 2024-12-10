@@ -103,7 +103,7 @@ class Wrapper:
             try:
                 result = func(*args, **kwargs)
             except Exception as e:
-                logger.info(f"func_name : {func.__name__}; - args: {args}; - kwargs: {kwargs}")
+                logger.info(f"func_name: {func.__name__}; - args: {args}; - kwargs: {kwargs}")
                 raise e
             else:
                 return result
