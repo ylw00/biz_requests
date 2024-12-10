@@ -23,6 +23,8 @@ class Tm(BizRequest):
 
     def crawl_response(self):
         data = {'aa': 111}
+        data = self.request.get('https://www.baidu.com').json()
+
         self.safe_parse(self.parse_respone, data)
 
 

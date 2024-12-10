@@ -22,6 +22,9 @@ from tools.dataframe import Content2DfParamsConfig, content2df
 # sys.path.append(os.path.join(F_PATH, '..'))
 # sys.path.append(os.path.join(F_PATH, '../..'))
 
+def decode_bytes(value):
+    return value.decode() if isinstance(value, bytes) else value
+
 
 class Response(RResponse):
     headers: Optional[Headers] = None
@@ -81,7 +84,7 @@ def ResponseSetAttr(self, req, resp) -> Response:
     response = Response()
 
     response.status_code = getattr(resp, "status", None)
-    response.headers = Headers({k.decode(): v.decode() for k, v in getattr(resp, "headers", {}).items()})
+    response.headers = Headers({decode_bytes(k): decode_bytes(v) for k, v in getattr(resp, "headers", {}).items()})
 
     response.encoding = get_encoding_from_headers(response.headers)
     response.raw = resp
