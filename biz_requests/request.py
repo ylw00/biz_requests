@@ -6,19 +6,15 @@
 # import sys
 # import os
 from requests import Session
-from requests.adapters import HTTPAdapter
-from hyper import HTTP20Adapter
 from typing import Optional
 from dataclasses import dataclass, field
 
+from biz_http import CustomAdapterHtt1, CustomAdapterHtt2
 from headers import Headers
 from response import Response
 from params import Method, RequestParams
 
 
-# F_PATH = os.path.dirname(__file__)
-# sys.path.append(os.path.join(F_PATH, '..'))
-# sys.path.append(os.path.join(F_PATH, '../..'))
 @dataclass
 class Config:
     init_engine: bool = field(default=True)  # 初始化引擎
@@ -27,26 +23,17 @@ class Config:
     delay: int = field(default=0)  # 重试间隔
     headers: dict = field(default_factory=dict)  # 初始化添加header key
     r_encoding: str = field(default=None)  # 响应编码 默认不设置
-
-
-class CustomAdapter(HTTPAdapter):
-
-    def __init__(self, debugger: bool = True):
-        super(CustomAdapter, self).__init__()
-        self.__debugger = debugger
-
-    def build_response(self, req, resp):
-        # 使用 BizResponse 来构建响应对象
-        response = Response(req, resp, self.__debugger)
-        return response
+    http2: bool = field(default=False)  # 是否使用http2
 
 
 class Request:
     RP = RequestParams
     M = Method
+    C = Config
 
-    def __init__(self):
-        self.__config: Optional[Config] = None
+    def __init__(self, config: Optional[Config] = None):
+        self.__config = config or Config()
+
         self.headers: Optional[Headers] = None
         self.session: Optional[Session] = None
 
@@ -60,8 +47,8 @@ class Request:
         self.session.headers = self.headers = Headers(headers)
 
         # 自定义适配器
-        self.session.mount('http://', CustomAdapter())
-        self.session.mount('https://', CustomAdapter())
+        self.session.mount('http://', CustomAdapterHtt1())
+        self.session.mount('https://', CustomAdapterHtt1())
 
     def request(self, p: RequestParams) -> Response:
         method = p.method
@@ -85,11 +72,18 @@ class Request:
 
 if __name__ == '__main__':
     def demo():
-        requests = Request()
+        requests = Request(Request.C())
 
-        _ = requests.post(requests.RP(None, 'http://www.baidu.com', headers={
-
-        })).dataframe()
+        _ = requests.get(requests.RP(None, "https://spa16.scrape.center/", headers={
+            'accept': 'application/json, text/plain, */*',
+            'accept-encoding': 'gzip, deflate, br, zstd',
+            'accept-language': 'zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7',
+            'priority': 'u=1, i',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
+        }))
+        print(_.headers)
+        print(_.r_cookie())
+        print(_.cookies)
 
 
     demo()

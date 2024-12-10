@@ -9,9 +9,6 @@ from collections import OrderedDict
 from typing import Optional
 
 
-# from biz_requests.structures import CaseInsensitiveDict
-
-
 # F_PATH = os.path.dirname(__file__)
 # sys.path.append(os.path.join(F_PATH, '..'))
 # sys.path.append(os.path.join(F_PATH, '../..'))

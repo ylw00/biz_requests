@@ -7,6 +7,7 @@
 # import os
 import time
 import traceback
+import warnings
 from functools import wraps
 from typing import cast, Optional, TypeVar, Callable, Any
 from loguru import logger
@@ -18,6 +19,16 @@ from loguru import logger
 
 class Wrapper:
     F = TypeVar('F', bound=Callable[..., Optional[Any]])
+
+    @staticmethod
+    def wrapper_suppress_resource_warnings(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            with warnings.catch_warnings(record=True):
+                warnings.simplefilter('ignore', ResourceWarning)
+                return func(*args, **kwargs)
+
+        return cast(Wrapper.F, wrapper)
 
     @staticmethod
     def __traceback_str(error: Exception) -> str:

@@ -6,13 +6,15 @@
 # import sys
 # import os
 import pandas as pd
-from requests.models import Response as DResponse
 from json import loads as json_loads
-from typing import Optional
+from typing import Optional, Union
+from requests.models import Response as DResponse
+from requests.utils import get_encoding_from_headers
+from requests.cookies import extract_cookies_to_jar
 
 from headers import Headers
-from cookie import extract_cookies_to_jar
 from tools.wrapper import Wrapper
+from tools.cookies import cookie_str2dict
 
 
 # F_PATH = os.path.dirname(__file__)
@@ -20,86 +22,66 @@ from tools.wrapper import Wrapper
 # sys.path.append(os.path.join(F_PATH, '../..'))
 
 
-class ResponseEncoding:
-    @staticmethod
-    def _parse_content_type_header(header):
-        tokens = header.split(";")
-        content_type, params = tokens[0].strip(), tokens[1:]
-        params_dict = {}
-        items_to_strip = "\"' "
-
-        for param in params:
-            param = param.strip()
-            if param:
-                key, value = param, True
-                index_of_equals = param.find("=")
-                if index_of_equals != -1:
-                    key = param[:index_of_equals].strip(items_to_strip)
-                    value = param[index_of_equals + 1:].strip(items_to_strip)
-                params_dict[key.lower()] = value
-        return content_type, params_dict
-
-    def get_encoding_from_headers(self, headers):
-        content_type = headers.get("content-type")
-
-        if not content_type:
-            return None
-
-        content_type, params = self._parse_content_type_header(content_type)
-
-        if "charset" in params:
-            return params["charset"].strip("'\"")
-
-        if "text" in content_type:
-            return "ISO-8859-1"
-
-        if "application/json" in content_type:
-            return "utf-8"
-
-
 class Response(DResponse):
-    response_encoding = ResponseEncoding()
+    headers: Optional[Headers] = None
 
-    def __init__(self, req, resp: DResponse, debugger: bool = False):
+    def __init__(self, debugger: bool = False):
         super(Response, self).__init__()
-        self.status_code = getattr(resp, "status", None)
-        self.headers: Headers = Headers(dict(getattr(resp, "headers", {}).items()))
-
-        self.encoding = self.response_encoding.get_encoding_from_headers(resp.headers)
-        self.raw = resp
-        self.reason = self.raw.reason
-        self.url = req.url.decode("utf-8") if isinstance(req.url, bytes) else req.url
-
-        extract_cookies_to_jar(self.cookies, req, resp)
-
-        self.request = req
-        self.connection = self
-
         self.__debugger = debugger
         self.__text: Optional[str] = None
+        self.__Custom = Union[str, dict, None]
+
+    def r_cookie(self, as_dict: bool = True) -> Union[str, dict]:
+        _ck = self.headers.get('set-cookie')
+        if as_dict:
+            return cookie_str2dict(_ck)
+        return _ck
 
     @property
     def text(self) -> str:
         if not hasattr(self, '__text'):
             self.__text = super().text
+        self.__Custom = self.__text
         return self.__text
 
     @Wrapper.save_resp_error
     def json(self, *args, **kwargs) -> dict:
-        return super(Response, self).json()
+        d = super(Response, self).json()
+        self.__Custom = d
+        return d
 
     @property
     @Wrapper.save_resp_error
     def jsonp2json(self) -> dict:
         _text = self.text
-        return json_loads(_text[_text.find('{'):_text.rfind('}') + 1])
+        d = json_loads(_text[_text.find('{'):_text.rfind('}') + 1])
+        self.__Custom = d
+        return d
 
     @Wrapper.save_resp_error
     def dataframe(self, *args, **kwargs) -> pd.DataFrame:
         return pd.DataFrame(self.content, *args, **kwargs)
 
     def callback_parse(self):
-        ...
+        d = self.__Custom
+
+
+def ResponseSetAttr(self, req, resp) -> Response:
+    response = Response()
+
+    response.status_code = getattr(resp, "status", None)
+    response.headers = Headers({k.decode(): v.decode() for k, v in getattr(resp, "headers", {}).items()})
+
+    response.encoding = get_encoding_from_headers(response.headers)
+    response.raw = resp
+    response.reason = response.raw.reason
+
+    response.url = req.url.decode("utf-8") if isinstance(req.url, bytes) else req.url
+    extract_cookies_to_jar(response.cookies, req, resp)
+
+    response.request = req
+    response.connection = self
+    return response
 
 
 if __name__ == '__main__':
@@ -109,9 +91,13 @@ if __name__ == '__main__':
 
     def demo():
         class CustomAdapter(HTTPAdapter):
+            def __init__(self, debugger: bool = True):
+                super(CustomAdapter, self).__init__()
+                self.__debugger = debugger
+
             def build_response(self, req, resp):
                 # 使用 CustomResponse 来构建响应对象
-                response = Response(req, resp)
+                response = ResponseSetAttr(self, req, resp)
                 return response
 
         session = requests.Session()
