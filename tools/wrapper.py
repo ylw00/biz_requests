@@ -21,7 +21,7 @@ class Wrapper:
     F = TypeVar('F', bound=Callable[..., Optional[Any]])
 
     @staticmethod
-    def wrapper_suppress_resource_warnings(func):
+    def ignore_resource_warnings(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
             with warnings.catch_warnings(record=True):

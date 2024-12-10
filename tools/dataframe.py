@@ -5,16 +5,17 @@
 # @desc:
 # import sys
 # import os
-import io
+from io import BytesIO
 from zipfile import ZipFile
-from pandas import read_excel, read_csv, DataFrame
+from pandas import read_excel, read_csv, DataFrame, concat
 from numpy import nan as np_nan
 from enum import Enum
 from dataclasses import dataclass, field
 from base64 import b64decode
-from typing import Union, List
+from typing import Union, List, Dict
 
 from tools.wrapper import Wrapper
+
 
 # F_PATH = os.path.dirname(__file__)
 # sys.path.append(os.path.join(F_PATH, '..'))
@@ -46,6 +47,11 @@ class Content2DataframeParams:
     engine: str = field(default='openpyxl')  # pandas操作引擎
 
 
+def df_concat(*dfs):
+    """配合zip文件处理方法 合并多个zip中的excel文件"""
+    return concat(dfs, axis=0)
+
+
 def non2None(df: DataFrame, *, fields: str = None) -> DataFrame:
     """
     替换 nan 为 None
@@ -67,55 +73,97 @@ class Content2DataFrame:
         return b64decode(content)
 
     @staticmethod
-    @Wrapper.wrapper_suppress_resource_warnings
-    def read_xlsx(content: Union[bytes, io.BytesIO], sheet_name=0, header=0, **kwargs) -> DataFrame:
-
-        df: DataFrame = read_excel(content, sheet_name=sheet_name, header=header, **kwargs)
-        return df
+    @Wrapper.ignore_resource_warnings
+    def read_xlsx(content: Union[bytes, BytesIO], sheet_name=0, header=0, **kwargs) -> DataFrame:
+        return read_excel(content, sheet_name=sheet_name, header=header, **kwargs)
 
     @staticmethod
-    def read_csv(content: Union[bytes, io.BytesIO], encoding='utf-8', **kwargs) -> DataFrame:
-        """读取 csv 内容"""
-        return read_csv(content, encoding=encoding, **kwargs)
+    def read_csv(content: Union[bytes, BytesIO], sheet_name=0, header=0, encoding='utf-8', **kwargs) -> DataFrame:
+        return read_csv(content, sheet_name=sheet_name, header=header, encoding=encoding, **kwargs)
 
     @staticmethod
-    def extract_zip(zip_content: bytes, file_name: Union[str, List[str]]) -> bytes:
+    def extract_zip(zip_content: bytes, file_name: Union[str, List[str]]) -> Union[bytes, Dict[str, bytes]]:
         """解压 zip 文件中的内容并返回内部文件的字节流"""
-        with ZipFile(io.BytesIO(zip_content), 'r') as zip_file:
-            # 假设我们只处理第一个文件
-            file_name = zip_file.namelist()[0]
-            return zip_file.read(file_name)
+        extracted_files = {}
 
-    def content_to_dataframe(self, p: Content2DataframeParams) -> DataFrame:
+        f_list = [file_name] if isinstance(file_name, str) else file_name
+        with ZipFile(BytesIO(zip_content), 'r') as zip_file:
+            for f in f_list:
+                if f not in zip_file.namelist():  # 检查文件是否存在
+                    raise FileNotFoundError(f"File {f} not found in the ZIP archive.")
+                with zip_file.open(f) as file:
+                    extracted_files[f] = file.read()
+
+        if len(f_list) == 1:  # 如果只请求一个文件，直接返回文件内容字节流
+            return extracted_files[f_list[0]]
+        return extracted_files  # 返回多个文件时，返回一个字典
+
+    def _process_xlsx_content(self, content, sheet_name, header, engine, **kwargs):
+        """处理字节 XLSX 内容"""
+        return self.read_xlsx(BytesIO(content), sheet_name, header, engine=engine, **kwargs)
+
+    def _process_xlsx_base64(self, content, sheet_name, header, engine, **kwargs):
+        """处理 base64 编码的 XLSX 内容"""
+        decoded_content = self._parse_base64(content)
+        return self.read_xlsx(BytesIO(decoded_content), sheet_name, header, engine=engine, **kwargs)
+
+    def _process_xlsx_zip(self, content, file_name, sheet_name, header, engine, **kwargs):
+        """处理压缩的 XLSX 文件"""
+        zip_content = self.extract_zip(content, file_name)
+        if isinstance(zip_content, bytes):
+            return self.read_xlsx(BytesIO(zip_content), sheet_name, header, engine=engine, **kwargs)
+        return df_concat(*[
+            self.read_xlsx(BytesIO(c), sheet_name, header, engine=engine, **kwargs)
+            for c in zip_content.values()
+        ])
+
+    def _process_csv_content(self, content, sheet_name, header, encoding, engine, **kwargs):
+        """处理字节 CSV 内容"""
+        return self.read_csv(BytesIO(content), sheet_name, header, encoding, engine=engine, **kwargs)
+
+    def _process_csv_base64(self, content, sheet_name, header, encoding, engine, **kwargs):
+        """处理 base64 编码的 CSV 内容"""
+        decoded_content = self._parse_base64(content)
+        return self.read_csv(BytesIO(decoded_content), sheet_name, header, encoding, engine=engine, **kwargs)
+
+    def _process_csv_zip(self, content, file_name, sheet_name, header, encoding, engine, **kwargs):
+        """处理压缩的 CSV 文件"""
+        zip_content = self.extract_zip(content, file_name)
+        if isinstance(zip_content, bytes):
+            return self.read_csv(BytesIO(zip_content), sheet_name, header, encoding, engine=engine, **kwargs)
+        return df_concat(*[
+            self.read_csv(BytesIO(c), sheet_name, header, encoding, engine=engine, **kwargs)
+            for c in zip_content.values()
+        ])
+
+    def content_to_dataframe(self, p: Content2DataframeParams, **kwargs) -> DataFrame:
         """根据 ContentType 转换内容为 DataFrame"""
         c_type = p.c_type
         content = p.content
-        sheet_name = p.sheet_name
         header = p.header
         encoding = p.encoding
         engine = p.engine
+        sheet_name = p.sheet_name
+        file_name = p.file_name
 
-        if c_type == ContentType.xlsx_content:  # 直接读取原始的 xlsx 内容
-            return self.read_xlsx(io.BytesIO(content), sheet_name, header, engine=engine)
+        # 根据 content_type 调用相应的处理函数
+        if c_type == ContentType.xlsx_content:
+            return self._process_xlsx_content(content, sheet_name, header, engine, **kwargs)
 
-        if c_type == ContentType.xlsx_base64:  # 读取解码后的 xlsx 内容
-            decoded_content = self._parse_base64(content)
-            return self.read_xlsx(io.BytesIO(decoded_content))
+        if c_type == ContentType.xlsx_base64:
+            return self._process_xlsx_base64(content, sheet_name, header, engine, **kwargs)
 
-        if c_type == ContentType.xlsx_zip:  # 解压并读取 xlsx 文件
-            zip_content = self.extract_zip(content)
-            return self.read_xlsx(io.BytesIO(zip_content))
+        if c_type == ContentType.xlsx_zip:
+            return self._process_xlsx_zip(content, file_name, sheet_name, header, engine, **kwargs)
 
         if c_type == ContentType.csv_content:
-            return self.read_csv(io.BytesIO(content), encoding)  # 直接读取原始的 csv 内容
+            return self._process_csv_content(content, sheet_name, header, encoding, engine, **kwargs)
 
         if c_type == ContentType.csv_base64:
-            decoded_content = self._parse_base64(content)
-            return self.read_csv(io.BytesIO(decoded_content), encoding)  # 读取解码后的 csv 内容
+            return self._process_csv_base64(content, sheet_name, header, encoding, engine, **kwargs)
 
         if c_type == ContentType.csv_zip:
-            zip_content = self.extract_zip(content)
-            return self.read_csv(io.BytesIO(zip_content), encoding)  # 解压并读取 csv 文件
+            return self._process_csv_zip(content, file_name, sheet_name, header, encoding, engine, **kwargs)
 
         raise ValueError(f"Unsupported content type: {c_type}")
 
