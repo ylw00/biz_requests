@@ -8,7 +8,7 @@
 import pandas as pd
 from json import loads as json_loads
 from typing import Optional, Union
-from requests.models import Response
+from requests.models import Response as RResponse
 from requests.utils import get_encoding_from_headers
 from requests.cookies import extract_cookies_to_jar
 
@@ -23,11 +23,11 @@ from tools.dataframe import ContentTypeEnum, Content2DfParamsConfig, content2df
 # sys.path.append(os.path.join(F_PATH, '../..'))
 
 
-class BizResponse(Response):
+class Response(RResponse):
     headers: Optional[Headers] = None
 
     def __init__(self, debugger: bool = False):
-        super(BizResponse, self).__init__()
+        super(Response, self).__init__()
         self.__debugger = debugger
         self.__text: Optional[str] = None
 
@@ -45,7 +45,7 @@ class BizResponse(Response):
 
     @Wrapper.save_resp_error
     def json(self, *args, **kwargs) -> dict:
-        return super(BizResponse, self).json()
+        return super(Response, self).json()
 
     @property
     @Wrapper.save_resp_error
@@ -67,8 +67,8 @@ class BizResponse(Response):
         ))
 
 
-def ResponseSetAttr(self, req, resp) -> BizResponse:
-    response = BizResponse()
+def ResponseSetAttr(self, req, resp) -> Response:
+    response = Response()
 
     response.status_code = getattr(resp, "status", None)
     response.headers = Headers({k.decode(): v.decode() for k, v in getattr(resp, "headers", {}).items()})

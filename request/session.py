@@ -5,20 +5,20 @@
 # @desc:
 # import sys
 # import os
-from requests import Session
+from requests import Session as RSession
 from typing import Optional
 from dataclasses import dataclass, field
 
-from biz_http import CustomAdapterHtt1  # , CustomAdapterHtt2
+from http1 import CustomAdapterHtt1  # , CustomAdapterHtt2
 from headers import Headers
-from biz_response import BizResponse
+from response import Response
 from params import MethodEnum, RequestParams
 
 
 @dataclass
 class RequestConfig:
-    init_engine: bool = field(default=True)  # 初始化引擎
-    dbname: str = field(default=None)  # 数据库名称
+    # init_engine: bool = field(default=True)  # 初始化引擎
+    # dbname: str = field(default=None)  # 数据库名称
     retries: int = field(default=0)  # 请求重试次数
     delay: int = field(default=0)  # 重试间隔
     headers: dict = field(default_factory=dict)  # 初始化添加header key
@@ -26,7 +26,7 @@ class RequestConfig:
     http2: bool = field(default=False)  # 是否使用http2
 
 
-class BizSession:
+class Session:
     RP = RequestParams
     M = MethodEnum
     RC = RequestConfig
@@ -35,22 +35,22 @@ class BizSession:
         self.__config = config or RequestConfig()
 
         self.headers: Optional[Headers] = None
-        self.session: Optional[Session] = None
+        self.session: Optional[RSession] = None
 
         self.reset_session()
 
     def reset_session(self, headers: Optional[dict] = None):
-        if isinstance(self.session, Session):
+        if isinstance(self.session, RSession):
             self.session.close()
 
-        self.session = Session()
+        self.session = RSession()
         self.session.headers = self.headers = Headers(headers)
 
         # 自定义适配器
         self.session.mount('http://', CustomAdapterHtt1())
         self.session.mount('https://', CustomAdapterHtt1())
 
-    def request(self, p: RequestParams) -> BizResponse:
+    def request(self, p: RequestParams) -> Response:
         method = p.method
         if method not in MethodEnum:
             raise ValueError(f"Invalid method: `{method}`")
@@ -58,7 +58,7 @@ class BizSession:
                 method.value, p.url, params=p.params, data=p.data, json=p.json, headers=p.headers,
                 cookies=p.cookies, timeout=p.timeout, verify=p.verify, allow_redirects=p.allow_redirects
         ) as response:
-            response: BizResponse = response
+            response: Response = response
             return response
 
     def get(self, p: RequestParams):
@@ -72,7 +72,7 @@ class BizSession:
 
 if __name__ == '__main__':
     def demo():
-        requests = BizSession(BizSession.C())
+        requests = Session(Session.C())
 
         _ = requests.get(requests.RP(None, "https://spa16.scrape.center/", headers={
             'accept': 'application/json, text/plain, */*',
