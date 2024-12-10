@@ -28,8 +28,8 @@ class RequestConfig:
 
 class Session:
     RP = RequestParams
-    M = MethodEnum
     RC = RequestConfig
+    M = MethodEnum
 
     def __init__(self, config: Optional[RequestConfig] = None):
         self.__config = config or RequestConfig()
@@ -50,24 +50,37 @@ class Session:
         self.session.mount('http://', CustomAdapterHtt1())
         self.session.mount('https://', CustomAdapterHtt1())
 
-    def request(self, p: RequestParams) -> Response:
-        method = p.method
-        if method not in MethodEnum:
-            raise ValueError(f"Invalid method: `{method}`")
+    def request(
+            self, method, url, params=None, data=None, headers=None, cookies=None, files=None, auth=None, timeout=None,
+            allow_redirects=True, proxies=None, hooks=None, stream=None, verify=None, cert=None, json=None,
+            retries=0, delay=0,
+    ) -> Response:
         with self.session.request(
-                method.value, p.url, params=p.params, data=p.data, json=p.json, headers=p.headers,
-                cookies=p.cookies, timeout=p.timeout, verify=p.verify, allow_redirects=p.allow_redirects
+                method, url, params, data, headers, cookies, files, auth, timeout,
+                allow_redirects, proxies, hooks, stream, verify, cert, json
         ) as response:
             response: Response = response
             return response
 
-    def get(self, p: RequestParams):
-        p.method = MethodEnum.get
-        return self.request(p)
+    def get(
+            self, url, params=None, data=None, headers=None, cookies=None, files=None, auth=None, timeout=None,
+            allow_redirects=True, proxies=None, hooks=None, stream=None, verify=None, cert=None, json=None,
+            retries=0, delay=0,
+    ):
+        return self.request(
+            'get', url, params, data, headers, cookies, files, auth, timeout,
+            allow_redirects, proxies, hooks, stream, verify, cert, json, retries, delay
+        )
 
-    def post(self, p: RequestParams):
-        p.method = MethodEnum.post
-        return self.request(p)
+    def post(
+            self, url, params=None, data=None, headers=None, cookies=None, files=None, auth=None, timeout=None,
+            allow_redirects=True, proxies=None, hooks=None, stream=None, verify=None, cert=None, json=None,
+            retries=0, delay=0,
+    ):
+        return self.request(
+            'post', url, params, data, headers, cookies, files, auth, timeout,
+            allow_redirects, proxies, hooks, stream, verify, cert, json, retries, delay
+        )
 
 
 if __name__ == '__main__':
@@ -82,7 +95,7 @@ if __name__ == '__main__':
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
         }))
         print(_.headers)
-        print(_.r_cookie())
+        print(_.resp_cookie())
         print(_.cookies)
 
 

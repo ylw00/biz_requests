@@ -16,11 +16,11 @@ from db_engine import Engine, EngineConfig
 
 class Request:
     def __init__(self):
-        self.session: Optional[Session] = None
+        self.request: Optional[Session] = None
         self.engine: Optional[Engine] = None
 
-    def init_session(self, retries=0, delay=0, headers=None, encoding=None, http2=False):
-        self.session = Session(RequestConfig(
+    def init_request(self, retries=0, delay=0, headers=None, encoding=None, http2=False):
+        self.request = Session(RequestConfig(
             retries=retries, delay=delay, headers=headers, r_encoding=encoding, http2=http2
         ))
         return self
@@ -32,5 +32,26 @@ class Request:
         return self
 
 
+class BizRequest(Request):
+    def __init__(self):
+        super(BizRequest, self).__init__()
+
+    def lopp_page(self):
+        ...
+
+    def safe_parse(self):
+        ...
+
+
 if __name__ == '__main__':
-    pass
+    def demo():
+        class Tm(BizRequest):
+            def __init__(self):
+                super(Tm, self).__init__()
+                self.init_request().init_engine()
+
+            def crawl_response(self):
+                self.request.get('', headers={}).json()
+
+
+    demo()

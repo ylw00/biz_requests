@@ -15,7 +15,7 @@ from requests.cookies import extract_cookies_to_jar
 from headers import Headers
 from tools.wrapper import Wrapper
 from tools.cookies import cookie_str2dict
-from tools.dataframe import ContentTypeEnum, Content2DfParamsConfig, content2df
+from tools.dataframe import Content2DfParamsConfig, content2df
 
 
 # F_PATH = os.path.dirname(__file__)
@@ -31,11 +31,16 @@ class Response(RResponse):
         self.__debugger = debugger
         self.__text: Optional[str] = None
 
-    def r_cookie(self, as_dict: bool = True) -> Union[str, dict]:
+    def resp_cookie(self, as_dict: bool = True) -> Union[str, dict]:
         _ck = self.headers.get('set-cookie')
         if as_dict:
             return cookie_str2dict(_ck)
         return _ck
+
+    def set_encoding(self, encodeing: str):
+        self.encoding = encodeing
+        self.__text = None
+        return self
 
     @property
     def text(self) -> str:
@@ -54,7 +59,12 @@ class Response(RResponse):
         return json_loads(_text[_text.find('{'):_text.rfind('}') + 1])
 
     @Wrapper.save_resp_error
-    def df(self, c_type: ContentTypeEnum, **kwargs) -> pd.DataFrame:
+    def dataframe(self, c_type: str, **kwargs) -> pd.DataFrame:
+        """
+        :param c_type: ContentTypeEnum
+            xlsx_content | xlsx_zip | xlsx_base64
+            csv_content | csv_zip | csv_base64
+        """
         return content2df(c_type, self.content, Content2DfParamsConfig(
             c_type=c_type,
             content=self.content,
@@ -110,7 +120,7 @@ if __name__ == '__main__':
             "accept-language": "zh-CN,zh;q=0.9",
             "content-type": "application/json;charset=UTF-8",
             "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
-        }).dataframe())
+        }).encoding)
 
 
     demo()
