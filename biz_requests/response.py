@@ -7,7 +7,7 @@
 # import os
 import pandas as pd
 from json import loads as json_loads
-from typing import Optional, Union
+from typing import Optional, Union, Callable
 from requests.models import Response as DResponse
 from requests.utils import get_encoding_from_headers
 from requests.cookies import extract_cookies_to_jar
@@ -15,6 +15,7 @@ from requests.cookies import extract_cookies_to_jar
 from headers import Headers
 from tools.wrapper import Wrapper
 from tools.cookies import cookie_str2dict
+from tools.dataframe import ContentType, Content2DfParams, content2df
 
 
 # F_PATH = os.path.dirname(__file__)
@@ -29,7 +30,6 @@ class Response(DResponse):
         super(Response, self).__init__()
         self.__debugger = debugger
         self.__text: Optional[str] = None
-        self.__Custom = Union[str, dict, None]
 
     def r_cookie(self, as_dict: bool = True) -> Union[str, dict]:
         _ck = self.headers.get('set-cookie')
@@ -41,29 +41,30 @@ class Response(DResponse):
     def text(self) -> str:
         if not hasattr(self, '__text'):
             self.__text = super().text
-        self.__Custom = self.__text
         return self.__text
 
     @Wrapper.save_resp_error
     def json(self, *args, **kwargs) -> dict:
-        d = super(Response, self).json()
-        self.__Custom = d
-        return d
+        return super(Response, self).json()
 
     @property
     @Wrapper.save_resp_error
     def jsonp2json(self) -> dict:
         _text = self.text
-        d = json_loads(_text[_text.find('{'):_text.rfind('}') + 1])
-        self.__Custom = d
-        return d
+        return json_loads(_text[_text.find('{'):_text.rfind('}') + 1])
 
     @Wrapper.save_resp_error
-    def dataframe(self, *args, **kwargs) -> pd.DataFrame:
-        return pd.DataFrame(self.content, *args, **kwargs)
-
-    def callback_parse(self):
-        d = self.__Custom
+    def dataframe(self, c_type: ContentType, **kwargs) -> pd.DataFrame:
+        return content2df(c_type, self.content, Content2DfParams(
+            c_type=c_type,
+            content=self.content,
+            encoding=kwargs.get('encoding', 'utf-8'),
+            dtype=kwargs.get('dtype'),
+            sheet_name=kwargs.get('sheet_name', 0),
+            header=kwargs.get('header', 0),
+            file_name=kwargs.get('file_name'),
+            engine=kwargs.get('engine', 'openpyxl'),
+        ))
 
 
 def ResponseSetAttr(self, req, resp) -> Response:
