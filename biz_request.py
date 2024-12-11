@@ -30,7 +30,7 @@ class Request:
         return self
 
 
-class BizRequest(Request, ABC):
+class BizRequest(Request):
     """
     在这里拓展业务代码/封装
     """
