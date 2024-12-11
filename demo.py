@@ -30,4 +30,22 @@ class Tm(BizRequest):
 
 
 if __name__ == '__main__':
+    def demo():
+        requests = Tm().request
+
+        _ = requests.get("https://spa16.scrape.center/", headers={
+            'accept': 'application/json, text/plain, */*',
+            'accept-encoding': 'gzip, deflate, br, zstd',
+            'accept-language': 'zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7',
+            'priority': 'u=1, i',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
+        }, delay=3, retries=2)
+        print(_.headers)
+        print(_.resp_cookie())
+        print(_.cookies)
+
+
+    demo()
+
+
     Tm().crawl_response()

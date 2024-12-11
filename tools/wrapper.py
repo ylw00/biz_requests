@@ -27,6 +27,10 @@ def is_instance_method(func):
     return hasattr(func, '__self__') and func.__self__ is not None
 
 
+def get_traceback_str(error: Exception) -> str:
+    return '\n'.join([i.strip().replace('    ', '  ') for i in traceback.format_tb(error.__traceback__)])
+
+
 class WrapperKeyCache(OrderedDict):
     def __init__(self, max_size):
         super().__init__()
