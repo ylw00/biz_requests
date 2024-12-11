@@ -6,14 +6,15 @@
 ```python
 from biz_request import BizRequest
 
+
 # 注意, 该类只能继承使用
 
 class Demo(BizRequest):
     def __init__(self):
         super(Demo, self).__init__()
-        self.init_request(
+        self.set_request(
             # 初始化请求
-        ).init_engine(
+        ).set_engine(
             # 初始化数据库
         )
 
@@ -29,6 +30,6 @@ class Demo(BizRequest):
         req.set_encoding()  # 设置响应编码, 并重新获取
         req.set_encoding('utf-8').json()
         req.set_encoding('utf-8').text
-        
+
         self.request.get('', headers={}).resp_cookie()  # 获取到response.set_cookie
 ```

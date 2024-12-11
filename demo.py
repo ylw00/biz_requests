@@ -15,17 +15,18 @@ from biz_request import BizRequest
 class Tm(BizRequest):
     def __init__(self):
         super(Tm, self).__init__()
-        self.init_request()
+        self.set_request()
 
     @staticmethod
     def parse_respone(response_j: dict):
-        response_j['aaa']
+        return response_j['aa']
 
     def crawl_response(self):
         data = {'aa': 111}
-        data = self.request.get('https://www.baidu.com').json()
+        # data = self.request.get('https://www.baidu.com').json()
 
-        self.safe_parse(self.parse_respone, data)
+        print(self.safe_parse(self.parse_respone, data))
+        print(self.safe_parse(self.parse_respone, {'aa': 11111}))
 
 
 if __name__ == '__main__':
