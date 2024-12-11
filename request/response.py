@@ -16,7 +16,8 @@ from .headers import Headers
 from tools.wrapper import Wrapper
 from tools.cookies import cookie_str2dict
 from tools.dataframe import Content2DfParamsConfig, content2df
-
+import urllib3
+urllib3.util.ssl_.DEFAULT_CIPHERS = 'ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+HIGH:DH+HIGH:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+HIGH:RSA+3DES'
 
 # F_PATH = os.path.dirname(__file__)
 # sys.path.append(os.path.join(F_PATH, '..'))
