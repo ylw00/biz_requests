@@ -12,12 +12,14 @@
 from .session import RequestConfig, Session
 from .response import Content2DfParamsConfig, content2df
 from .params import MethodEnum
+from .headers import Headers
 
 
 __all__ = [
     'Session',
     'RequestConfig',
     'MethodEnum',
+    'Headers',
     'Content2DfParamsConfig',
     'content2df',
 ]

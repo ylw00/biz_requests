@@ -17,9 +17,9 @@ from biz_request import BizRequest
 class Demo(BizRequest):
     def __init__(self):
         super(Demo, self).__init__()
-        self.set_request(
+        self.setRequest(
             # 初始化请求
-        ).set_engine(
+        ).setEngine(
             # 初始化数据库
         )
 

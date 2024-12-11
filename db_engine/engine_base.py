@@ -48,6 +48,9 @@ class EngineBase:
         self.engine: Engine = self.create_engine(engine_config)
         self.__dbname = engine_config.dbname
 
+    def __del__(self):
+        self.close_engine()
+
     def create_engine(self, engine_config: EngineConfig) -> Engine:
         _mysql_config = engine_config
         return create_engine(self._CONN_MODE.format(

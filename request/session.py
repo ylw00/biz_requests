@@ -64,10 +64,11 @@ class Session:
                 allow_redirects=True, proxies=None, verify=None, json=None, retries=0, delay=0) -> Response:
         retries = retries or self._retries
         delay = delay or self._delay if retries else 0
+        head = headers or self.headers
 
         # 根据是否需要重试来决定使用哪个请求包装器
         req_wrap = self.__requests if retries == 0 else Wrapper.retry(retries=retries, delay=delay)(self.__requests)
-        return req_wrap(method, url, params, data, headers, cookies, timeout, allow_redirects, proxies, verify, json)
+        return req_wrap(method, url, params, data, head, cookies, timeout, allow_redirects, proxies, verify, json)
 
     def get(self, url, params=None, data=None, headers=None, cookies=None, timeout=None, allow_redirects=True,
             proxies=None, verify=None, json=None, retries=0, delay=0):

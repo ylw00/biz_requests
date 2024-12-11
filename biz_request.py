@@ -16,13 +16,13 @@ class Request:
         self.request: Optional[Session] = None
         self.engine: Optional[Engine] = None
 
-    def set_request(self, retries=0, delay=0, headers=None, encoding=None, http2=False):
+    def setRequest(self, retries=0, delay=0, headers=None, encoding=None, http2=False):
         self.request = Session(RequestConfig(
             retries=retries, delay=delay, headers=headers, r_encoding=encoding, http2=http2
         ))
         return self
 
-    def set_engine(self, dbname, user, pwd, host, port, charset):
+    def setEngine(self, dbname, user, pwd, host, port, charset):
         self.engine = Engine(EngineConfig(
             dbname=dbname, user=user, password=pwd, host=host, port=port, charset=charset
         ))

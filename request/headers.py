@@ -8,6 +8,8 @@
 from collections import OrderedDict
 from typing import Optional
 
+from tools.cookies import cookie_str2dict
+
 
 # F_PATH = os.path.dirname(__file__)
 # sys.path.append(os.path.join(F_PATH, '..'))
@@ -15,7 +17,7 @@ from typing import Optional
 
 class Headers(OrderedDict):
     __default_head = {
-        "accept": "application/json, text/plain, */*",
+        "accept-encoding": "application/json, text/plain, */*",
         "accept-language": "zh-CN,zh;q=0.9",
         "content-type": "application/json;charset=UTF-8",
         "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
@@ -62,8 +64,18 @@ class Headers(OrderedDict):
         super(Headers, self).update(m, **kwargs)
         return self
 
-    def copy(self: 'Headers') -> 'Headers':
-        return Headers()
+    def copy(self: 'Headers', **kwargs) -> 'Headers':
+        value = kwargs.get('value')
+        return Headers(value) if isinstance(value, dict) else Headers()
+
+    def cookie(self, as_dict=False) -> Union[str, dict, None]:
+        cookie: Optional[str] = self.get('cookie')
+        if as_dict is False:
+            return cookie
+
+        if not isinstance(cookie, str):
+            return {}
+        return cookie_str2dict(cookie)
 
 
 if __name__ == '__main__':
