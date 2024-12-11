@@ -7,7 +7,7 @@
 # import os
 import pandas as pd
 from json import loads as json_loads
-from typing import Optional, Union
+from typing import Optional, Union, Literal
 from requests.models import Response as RResponse
 from requests.utils import get_encoding_from_headers
 from requests.cookies import extract_cookies_to_jar
@@ -48,6 +48,7 @@ class Response(RResponse):
         self.__text = None
         return self
 
+    @property
     def text(self) -> str:
         if not hasattr(self, '__text'):
             self.__text = super().text
@@ -59,7 +60,7 @@ class Response(RResponse):
 
     @Wrapper.save_req_error
     def jsonp2json(self) -> dict:
-        _text = self.text()
+        _text = self.text
         return json_loads(_text[_text.find('{'):_text.rfind('}') + 1])
 
     @Wrapper.save_req_error
