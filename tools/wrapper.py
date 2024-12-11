@@ -8,6 +8,7 @@
 import time
 import traceback
 import warnings
+from hashlib import md5
 from functools import wraps
 from collections import OrderedDict
 from typing import cast, Optional, TypeVar, Callable, Any
@@ -117,7 +118,7 @@ class Wrapper:
         return decorator
 
     @staticmethod
-    def retry2success(retries=3, delay=10, *, desc: str = None):
+    def retry_until_success(retries=3, delay=10, *, desc: str = None):
         """
         装饰器：在指定次数内尝试调用被装饰的函数，每次尝试之间有指定的停留时间。
         :param retries: 尝试次数
@@ -127,7 +128,7 @@ class Wrapper:
         _desc = desc or 'None'
 
         def decorator(func):
-            cache_key = (func, retries, delay)
+            cache_key = md5(f"{id(func)}-{retries}-{delay}".encode('utf-8')).hexdigest()
             if cache_key in Wrapper.__cache:
                 return Wrapper.__cache.get(cache_key)
 
@@ -163,7 +164,7 @@ class Wrapper:
 
     @staticmethod
     def save_resp_error(func):
-        cache_key = (func,)
+        cache_key = md5(f"{id(func)}").hexdigest()
         if cache_key in Wrapper.__cache:
             return Wrapper.__cache.get(cache_key)
 

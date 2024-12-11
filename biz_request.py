@@ -41,9 +41,9 @@ class BizRequest(Request, ABC):
         super(BizRequest, self).__init__()
 
     @staticmethod
-    def safe_return(callback_func: Callable, retries=3, delay=10, *args, **kwargs):
+    def safe_retry_until_success(callback_func: Callable, *args, retries=3, delay=3, **kwargs):
         """安全的解析：业务demo: 1,等待报表导出完成"""
-        return Wrapper.retry2success(retries=retries, delay=delay)(callback_func)(*args, **kwargs)
+        return Wrapper.retry_until_success(retries=retries, delay=delay)(callback_func)(*args, **kwargs)
 
     @staticmethod
     def safe_parse(callback_func: Callable, *args, **kwargs):
