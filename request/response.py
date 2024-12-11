@@ -3,11 +3,9 @@
 # @file: response
 # @time: 2024/12/9
 # @desc:
-# import sys
-# import os
 import pandas as pd
 from json import loads as json_loads
-from typing import Optional, Union, Literal
+from typing import Optional, Union
 from requests.models import Response as RResponse
 from requests.utils import get_encoding_from_headers
 from requests.cookies import extract_cookies_to_jar
@@ -17,10 +15,6 @@ from tools.wrapper import Wrapper
 from tools.cookies import cookie_str2dict
 from tools.dataframe import Content2DfParamsConfig, content2df
 
-
-# F_PATH = os.path.dirname(__file__)
-# sys.path.append(os.path.join(F_PATH, '..'))
-# sys.path.append(os.path.join(F_PATH, '../..'))
 
 def decode_bytes(value):
     return value.decode() if isinstance(value, bytes) else value
@@ -38,12 +32,14 @@ class Response(RResponse):
         self.__text: Optional[str] = None
 
     def resp_cookie(self, as_dict: bool = True) -> Union[str, dict]:
+        """ 返回response.headers['set-cookie'] """
         _ck = self.headers.get('set-cookie')
         if as_dict:
             return cookie_str2dict(_ck)
         return _ck
 
     def set_encoding(self, encodeing: str):
+        """设置文本编码, 并返回self, 支持链式调用"""
         self.encoding = encodeing
         self.__text = None
         return self
@@ -60,12 +56,14 @@ class Response(RResponse):
 
     @Wrapper.save_req_error
     def jsonp2json(self) -> dict:
+        """jsonp 转 json"""
         _text = self.text
         return json_loads(_text[_text.find('{'):_text.rfind('}') + 1])
 
     @Wrapper.save_req_error
     def dataframe(self, c_type: str, **kwargs) -> pd.DataFrame:
         """
+        二进制报表类型下载
         :param c_type: ContentTypeEnum
             xlsx_content | xlsx_zip | xlsx_base64
             csv_content | csv_zip | csv_base64

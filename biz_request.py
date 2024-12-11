@@ -3,20 +3,13 @@
 # @file: request
 # @time: 2024/12/10
 # @desc:
-# import sys
-# import os
+from pandas import DataFrame
 from abc import ABC, abstractmethod
-from typing import Optional, Callable
+from typing import Optional, Callable, Union, List
 
 from request import Session, RequestConfig
 from db_engine import Engine, EngineConfig
-
 from tools.wrapper import Wrapper
-
-
-# F_PATH = os.path.dirname(__file__)
-# sys.path.append(os.path.join(F_PATH, '..'))
-# sys.path.append(os.path.join(F_PATH, '../..'))
 
 
 class Request:
@@ -57,12 +50,15 @@ class BizRequest(Request, ABC):
         """安全的解析"""
         return Wrapper.save_resp_error(callback_func)(*args, **kwargs)
 
-    # @abstractmethod
-    def start(self):
+    def save2db(self, item: Union[dict, List[dict], DataFrame]):
+        """数据入库"""
+
+    def init_attribute(self):
+        """初始化属性到self"""
         ...
 
-    # @abstractmethod
-    def init_attribute(self):
+    def start(self):
+        """主入口函数"""
         ...
 
 
