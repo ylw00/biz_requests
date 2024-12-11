@@ -4,7 +4,6 @@
 # @time: 2024/12/10
 # @desc:
 from pandas import DataFrame
-from abc import ABC, abstractmethod
 from typing import Optional, Callable, Union, List
 
 from request import Session, RequestConfig
@@ -42,7 +41,7 @@ class BizRequest(Request):
 
     @staticmethod
     def safe_retry_until_success(callback_func: Callable, *args, retries=3, delay=3, **kwargs):
-        """安全的解析：业务demo: 1,等待报表导出完成"""
+        """安全的返回：业务demo: 1,等待报表导出完成"""
         return Wrapper.retry_until_success(retries=retries, delay=delay)(callback_func)(*args, **kwargs)
 
     @staticmethod
