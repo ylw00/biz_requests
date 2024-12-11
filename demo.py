@@ -25,8 +25,8 @@ class Tm(BizRequest):
         data = {'aa': 111}
         # data = self.request.get('https://www.baidu.com').json()
 
-        print(self.safe_retry_until_success(self.parse_respone, data))
-        print(self.safe_retry_until_success(self.parse_respone, {'aa': 11111}))
+        print(self.safe_retry_until_done(self.parse_respone, data))
+        print(self.safe_retry_until_done(self.parse_respone, {'aa': 11111}))
 
 
 if __name__ == '__main__':
