@@ -19,8 +19,6 @@ from tools.wrapper import Wrapper
 
 @dataclass
 class RequestConfig:
-    # init_engine: bool = field(default=True)  # 初始化引擎
-    # dbname: str = field(default=None)  # 数据库名称
     retries: int = field(default=0)  # 请求重试次数
     delay: int = field(default=0)  # 重试间隔
     headers: dict = field(default_factory=dict)  # 初始化添加header key
