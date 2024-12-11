@@ -5,7 +5,6 @@
 # @desc:
 # import sys
 # import os
-import inspect
 from requests import Session as RSession
 from typing import Optional
 from dataclasses import dataclass, field

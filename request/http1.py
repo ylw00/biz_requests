@@ -29,24 +29,24 @@ class CustomAdapterHtt1(HTTPAdapter):
         return ResponseSetAttr(self, req, resp)
 
 
-class FakeOriginalResponse(object):  # pragma: no cover
-    def __init__(self, headers):
-        self._headers = headers
-
-    def get_all(self, name, default=None):
-        values = []
-
-        for n, v in self._headers:
-            if n == name.lower():
-                values.append(v)
-
-        if not values:
-            return default
-
-        return values
-
-    def getheaders(self, name):
-        return self.get_all(name, [])
+# class FakeOriginalResponse(object):  # pragma: no cover
+#     def __init__(self, headers):
+#         self._headers = headers
+#
+#     def get_all(self, name, default=None):
+#         values = []
+#
+#         for n, v in self._headers:
+#             if n == name.lower():
+#                 values.append(v)
+#
+#         if not values:
+#             return default
+#
+#         return values
+#
+#     def getheaders(self, name):
+#         return self.get_all(name, [])
 
 
 # class CustomAdapterHtt2(HTTP20Adapter):

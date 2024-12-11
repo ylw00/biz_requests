@@ -47,5 +47,4 @@ if __name__ == '__main__':
 
     demo()
 
-
     Tm().crawl_response()

@@ -1,7 +1,12 @@
 # BizRequests
 面向工作的requests封装
 
-## 新增方法
+## 日志
+```text
+内部使用了 loguru
+```
+
+## 新增封装方法
 
 ```python
 from biz_request import BizRequest

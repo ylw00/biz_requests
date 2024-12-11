@@ -9,11 +9,11 @@
 # F_PATH = os.path.dirname(__file__)
 # sys.path.append(os.path.join(F_PATH, '..'))
 # sys.path.append(os.path.join(F_PATH, '../..'))
-# from biz_request import BizRequest
+from biz_request import BizRequest
 
-# __all__ = [
-#     'BizRequest'
-# ]
+__all__ = [
+    'BizRequest'
+]
 
 if __name__ == '__main__':
     pass
