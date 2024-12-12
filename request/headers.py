@@ -65,6 +65,11 @@ class Headers(OrderedDict):
         return self
 
     def copy(self: 'Headers', **kwargs) -> 'Headers':
+        """
+        **kwargs:
+            state_stay: bools; 默认保存当前的字段状态
+            value: dict; 需要新增的字段
+        """
         state_stay = kwargs.get('state_stay', True)
         _d = dict(self) if state_stay else {}
         _d.update({k.lower(): v for k, v in kwargs.get('value', {}).items()})
