@@ -27,7 +27,7 @@ F = TypeVar('F', bound=Callable[..., Optional[Any]])
 @dataclass
 class EngineConfig:
     user: str
-    password: str
+    pwd: str
     host: str
     port: int
     dbname: str
@@ -55,7 +55,7 @@ class EngineBase:
         _mysql_config = engine_config
         return create_engine(self._CONN_MODE.format(
             user=engine_config.user,
-            pwd=parse.quote(engine_config.password),
+            pwd=parse.quote(engine_config.pwd),
             host=engine_config.host,
             port=engine_config.port,
             db=engine_config.dbname,

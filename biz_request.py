@@ -26,7 +26,7 @@ class Request:
 
     def setEngine(self, dbname, user, pwd, host, port, charset):
         self.engine = Engine(EngineConfig(
-            dbname=dbname, user=user, password=pwd, host=host, port=port, charset=charset
+            dbname=dbname, user=user, pwd=pwd, host=host, port=port, charset=charset
         ))
         return self
 
