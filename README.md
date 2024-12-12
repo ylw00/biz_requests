@@ -38,11 +38,11 @@ biz_req.setRequest().setEngine()  # 设置seeion, mysql连接
 
 # 请求新增两个参数  delay=3, retries=2 如果 delay=0 则不重试 默认不重试
 _ = biz_req.request.get('').text
-biz_req.request.get('').json()  # 报错则 自动日志输出返回值文本
-biz_req.request.get('').jsonp2json()  # 报错则 自动日志输出返回值文本
+biz_req.request.get('').json()  # 报错则自动日志输出.text文本
+biz_req.request.get('').jsonp2json()  # 报错则自动日志输出.text文本
 
 # 支持六种模式  xlsx_content | xlsx_zip | xlsx_base64 | csv_content | csv_zip | csv_base64
-biz_req.request.get('').dataframe()
+biz_req.request.get('').dataframe()  # 报错则自动日志输出.text文本
 ```
 
 ### 4. 特性
