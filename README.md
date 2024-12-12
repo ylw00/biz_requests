@@ -1,6 +1,6 @@
 # BizRequests
 
-简易requests方法拓展
+简易requests的方法的拓展
 
 vx: y278369368
 
