@@ -65,6 +65,12 @@ def demo():
     ...
 ```
 
+### 拓展
+```text
+response.py  # 新增返回值类型
+biz_requests.py  # 加入业务函数封装
+```
+
 ### 5. 菜菜菜
 
 ```text
