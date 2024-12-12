@@ -1,6 +1,6 @@
 # BizRequests
 
-requests封装
+简易requests封装
 
 vx: y278369368
 
