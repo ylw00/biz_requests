@@ -21,7 +21,6 @@ class RequestConfig:
     retries: int = field(default=0)  # 请求重试次数
     delay: int = field(default=0)  # 重试间隔
     headers: dict = field(default_factory=dict)  # 初始化添加header key
-    r_encoding: str = field(default=None)  # 响应编码 默认不设置
     http2: bool = field(default=False)  # 是否使用http2
 
 

@@ -17,9 +17,9 @@ class Request:
         self.engine: Optional[Engine] = None
         self.headers: Optional[Headers] = None
 
-    def setRequest(self, retries=0, delay=0, headers=None, encoding=None, http2=False):
+    def setRequest(self, retries=0, delay=0, headers=None, http2=False):
         self.request = Session(RequestConfig(
-            retries=retries, delay=delay, headers=headers, r_encoding=encoding, http2=http2
+            retries=retries, delay=delay, headers=headers, http2=http2
         ))
         self.headers = self.request.headers
         return self
