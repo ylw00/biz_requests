@@ -66,8 +66,7 @@ def demo():
 ### 5. 菜菜菜
 
 ```text
-1, 原本想使用 `from hyper.contrib import HTTP20Adapter` 使得 requests 支持 http2 请求, 
-但是好像并不理想, 就放弃了
+1, 原本想使用 `from hyper.contrib import HTTP20Adapter` 使得 requests 支持 http2 请求, 但是好像并不理想, 就放弃了
 
 2, 可以试试通过适配器 加入简单的 tls/ja3 指纹算法
 ```
