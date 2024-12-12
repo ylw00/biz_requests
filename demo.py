@@ -31,7 +31,7 @@ if __name__ == '__main__':
     def demo():
         requests = Tm().request
 
-        _ = requests.get("https://spa16.scrape.center/", headers={
+        _ = requests.get("https://www.baidu.com", headers={
             'accept': 'application/json, text/plain, */*',
             'accept-encoding': 'gzip, deflate, br, zstd',
             'accept-language': 'zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7',
