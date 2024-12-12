@@ -1,7 +1,9 @@
 # BizRequests
+
 面向工作的requests封装
 
 ### 1. 依赖
+
 ```text
 python==3.9.9
 requests==2.31.0
@@ -15,6 +17,7 @@ loguru==0.7.2
 ```
 
 ### 2. 背景/适合业务
+
 ```text
 - 对效率要求不搞
 - 数据准确性要求高
@@ -23,31 +26,36 @@ loguru==0.7.2
 ```
 
 ### 3. 新增封装方法
+
 ```python
 from biz_request import BizRequest
 
 # 请求方式跟requests一摸一样
 biz_req = BizRequest()  # 不能直接使用, 必须要继承, 这里只是做一个demo
 biz_req.setRequest().setEngine()  # 设置seeion, mysql连接
+
+# 请求新增两个参数  delay=3, retries=2 如果 delay=0 则不重试 默认不重试
 _ = biz_req.request.get('').text
-biz_req.request.get('').json()
-biz_req.request.get('').jsonp2json()
-biz_req.request.get('').dataframe()  # 支持六种模式  xlsx_content | xlsx_zip | xlsx_base64 | csv_content | csv_zip | csv_base64
+biz_req.request.get('').json()  # 自动日志输出返回值文本
+biz_req.request.get('').jsonp2json()  # 自动日志输出返回值文本
 
-
-
+# 支持六种模式  xlsx_content | xlsx_zip | xlsx_base64 | csv_content | csv_zip | csv_base64
+biz_req.request.get('').dataframe()
 ```
 
 ### 4. 特性
+
 ```python
 from biz_request import BizRequest, Wrapper, Headers
 
-Headers
+headers = Headers()
+# Headers【大写小写不敏感】; 并增加了方法, copy, cookie 
 
 
 # 解析失败的话, 则自动保存函数参数
 biz_req = BizRequest()  # 不能直接使用, 必须要继承, 这里只是做一个demo
 biz_req.safe_parse()  # 参数1: 回调解析response函数;  *args, **kwargs: 回调函数参数 
+
 
 # 适用于等待报表导出, 直至成功
 @Wrapper.retry_until_done(retries=5, delay=6, desc='...报表导出失败')
@@ -55,6 +63,14 @@ def demo():
     ...
 ```
 
+### 5. 菜菜菜
+
+```text
+原本想使用 `from hyper.contrib import HTTP20Adapter` 使得 requests 支持 http2 请求, 
+但是好像并不理想
+```
+
+### 完整demo
 ```python
 
 ```

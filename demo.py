@@ -15,16 +15,14 @@ from biz_request import BizRequest
 class Tm(BizRequest):
     def __init__(self):
         super(Tm, self).__init__()
-        self.setRequest()
+        self.setRequest().setEngine()
 
     @staticmethod
     def parse_respone(response_j: dict):
         return response_j['aaa']
 
     def crawl_response(self):
-        data = {'aa': 111}
-        # data = self.request.get('https://www.baidu.com').json()
-
+        data = {'aaa': 111}
         print(self.safe_retry_until_done(self.parse_respone, data))
         print(self.safe_retry_until_done(self.parse_respone, {'aa': 11111}))
 
