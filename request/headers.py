@@ -17,7 +17,7 @@ from tools.cookies import cookie_str2dict
 
 class Headers(OrderedDict):
     __default_head = {
-        "accept-encoding": "application/json, text/plain, */*",
+        "accept": "*/*",
         "accept-language": "zh-CN,zh;q=0.9",
         "content-type": "application/json;charset=UTF-8",
         "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
