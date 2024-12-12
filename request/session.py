@@ -44,7 +44,7 @@ class Session:
             self.session.close()
 
         self.session = RSession()
-        self.session.headers = self.headers = Headers(headers)
+        self.session.headers = self.headers = Headers(headers or self.__config.headers)
 
         # 自定义适配器
         self.session.mount('http://', CustomAdapterHtt1())
