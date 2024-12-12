@@ -52,7 +52,7 @@ headers = Headers()
 # Headers【大写小写不敏感】; 并增加了方法, copy, cookie 
 
 
-# 解析失败的话, 则自动保存函数参数
+# 解析失败的话, 则自动日志输出参数
 biz_req = BizRequest()  # 不能直接使用, 必须要继承, 这里只是做一个demo
 biz_req.safe_parse()  # 参数1: 回调解析response函数;  *args, **kwargs: 回调函数参数 
 
