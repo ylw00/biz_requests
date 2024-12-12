@@ -65,8 +65,10 @@ class Headers(OrderedDict):
         return self
 
     def copy(self: 'Headers', **kwargs) -> 'Headers':
-        value = kwargs.get('value')
-        return Headers(value) if isinstance(value, dict) else Headers()
+        state_stay = kwargs.get('state_stay', True)
+        _d = dict(self) if state_stay else {}
+        _d.update({k.lower(): v for k, v in kwargs.get('value', {}).items()})
+        return Headers(_d)
 
     def cookie(self, as_dict=False) -> Union[str, dict, None]:
         cookie: Optional[str] = self.get('cookie')
