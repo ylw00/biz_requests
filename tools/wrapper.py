@@ -118,7 +118,7 @@ class Wrapper:
         return decorator
 
     @staticmethod
-    def retry_until_success(retries=3, delay=10, *, desc: str = None):
+    def retry_until_done(retries=3, delay=10, *, desc: str = None):
         """
         装饰器：在指定次数内尝试调用被装饰的函数，每次尝试之间有指定的停留时间。
         :param retries: 尝试次数

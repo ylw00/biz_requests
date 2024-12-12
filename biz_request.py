@@ -47,7 +47,7 @@ class BizRequest(Request):
             1, 循环等待报表导出完成
             ...
         """
-        return Wrapper.retry_until_success(retries=retries, delay=delay)(callback_func)(*args, **kwargs)
+        return Wrapper.retry_until_done(retries=retries, delay=delay)(callback_func)(*args, **kwargs)
 
     @staticmethod
     def safe_parse(callback_func: Callable, *args, **kwargs):

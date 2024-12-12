@@ -10,9 +10,13 @@
 # sys.path.append(os.path.join(F_PATH, '..'))
 # sys.path.append(os.path.join(F_PATH, '../..'))
 from biz_request import BizRequest
+from request.headers import Headers
+from tools.wrapper import Wrapper
 
 __all__ = [
-    'BizRequest'
+    'BizRequest',
+    'Headers',
+    'Wrapper',
 ]
 
 if __name__ == '__main__':

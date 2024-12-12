@@ -6,7 +6,7 @@
 # import sys
 # import os
 from collections import OrderedDict
-from typing import Optional
+from typing import Optional, Union
 
 from tools.cookies import cookie_str2dict
 
