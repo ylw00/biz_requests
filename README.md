@@ -1,6 +1,6 @@
 # BizRequests
 
-面向工作的requests封装
+requests封装
 
 vx: y278369368
 
