@@ -71,7 +71,7 @@ response.py  # 新增返回值类型
 biz_requests.py  # 加入业务函数封装
 ```
 
-### 7. 菜菜菜
+### 6. 菜菜菜
 
 ```text
 1, 原本想使用 `from hyper.contrib import HTTP20Adapter` 使得 requests 支持 http2 请求, 
