@@ -65,13 +65,13 @@ def demo():
     ...
 ```
 
-### 拓展
+### 5. 拓展
 ```text
 response.py  # 新增返回值类型
 biz_requests.py  # 加入业务函数封装
 ```
 
-### 5. 菜菜菜
+### 7. 菜菜菜
 
 ```text
 1, 原本想使用 `from hyper.contrib import HTTP20Adapter` 使得 requests 支持 http2 请求, 
@@ -80,7 +80,7 @@ biz_requests.py  # 加入业务函数封装
 2, 可以试试通过适配器 加入简单的 tls/ja3 指纹算法
 ```
 
-### 6. 完整demo 见demo.py
+### 7. 完整demo 见demo.py
 ```text
 菜菜菜
 ```
