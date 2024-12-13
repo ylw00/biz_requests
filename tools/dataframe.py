@@ -93,8 +93,6 @@ class Content2df:
     def read_csv(content: Union[bytes, BytesIO], sheet_name=0, header=0, encoding='utf-8', **kwargs) -> DataFrame:
         return read_csv(content, sheet_name=sheet_name, header=header, encoding=encoding, **kwargs)
 
-
-
     def xlsx_content(self, content, sheet_name, header, engine, **kwargs) -> DataFrame:
         """处理字节 XLSX 内容"""
         return self.read_xlsx(BytesIO(content), sheet_name, header, engine=engine, **kwargs)
@@ -172,8 +170,8 @@ def content2df(c_type: str, content: Union[bytes, str], p: Content2DfParamsConfi
 
 if __name__ == '__main__':
     def run_func(**kwargs):
-
         cdp = Content2DfParamsConfig(header=kwargs.get('header'))
         print(cdp)
+
 
     run_func()
