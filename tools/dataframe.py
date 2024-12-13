@@ -77,10 +77,11 @@ class Content2df:
         """解压 zip 文件中的内容并返回内部文件的字节流"""
         extracted_files = {}
 
-        f_list = [file_name] if isinstance(file_name, str) else file_name
         with ZipFile(BytesIO(zip_content), 'r') as zip_file:
+            zip_file_list = zip_file.namelist()
+            f_list = [file_name] if isinstance(file_name, str) else (file_name or zip_file_list)
             for f in f_list:
-                if f not in zip_file.namelist():  # 检查文件是否存在
+                if f not in zip_file_list:  # 检查文件是否存在
                     raise FileNotFoundError(f"File {f} not found in the ZIP archive.")
                 with zip_file.open(f) as file:
                     extracted_files[f] = file.read()
