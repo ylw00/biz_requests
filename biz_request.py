@@ -3,6 +3,7 @@
 # @file: request
 # @time: 2024/12/10
 # @desc:
+from loguru import logger
 from pandas import DataFrame
 from typing import Optional, Callable, Union, List
 
@@ -17,17 +18,33 @@ class Request:
         self.engine: Optional[Engine] = None
         self.headers: Optional[Headers] = None
 
-    def setRequest(self, retries=0, delay=0, headers=None, http2=False):
-        self.request = Session(RequestConfig(
+    @staticmethod
+    def createRequest(retries=0, delay=0, headers=None, http2=False):
+        return Session(RequestConfig(
             retries=retries, delay=delay, headers=headers, http2=http2
         ))
+
+    @staticmethod
+    def createEngine(dbname, user, pwd, host, port, charset: str = 'utf8mb4'):
+        return Engine(EngineConfig(
+            dbname=dbname, user=user, pwd=pwd, host=host, port=port, charset=charset
+        ))
+
+    def initRequest(self, retries=0, delay=0, headers=None, http2=False):
+        if hasattr(self, 'request') and isinstance(self.request, Session):
+            logger.info("禁止重复初始化 `Request`;")
+            return self
+
+        self.request = self.createRequest(retries, delay, headers, http2)
         self.headers = self.request.headers
         return self
 
-    def setEngine(self, dbname, user, pwd, host, port, charset):
-        self.engine = Engine(EngineConfig(
-            dbname=dbname, user=user, pwd=pwd, host=host, port=port, charset=charset
-        ))
+    def initEngine(self, dbname, user, pwd, host, port, charset: str = 'utf8mb4'):
+        if hasattr(self, 'engine') and isinstance(self.engine, Engine):
+            logger.info("禁止重复初始化 `Engine`;")
+            return self
+
+        self.engine = self.createEngine(dbname, user, pwd, host, port, charset)
         return self
 
 

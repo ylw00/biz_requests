@@ -34,7 +34,7 @@ from biz_request import BizRequest
 
 # 请求方式跟requests一摸一样
 biz_req = BizRequest()  # 不能直接使用, 必须要继承, 这里只是做一个demo
-biz_req.setRequest().setEngine()  # 设置seeion, mysql连接
+biz_req.initRequest().initEngine()  # 设置seeion, mysql连接
 
 # 请求新增两个参数  delay=3, retries=2 如果 delay=0 则不重试 默认不重试
 _ = biz_req.request.get('').text
