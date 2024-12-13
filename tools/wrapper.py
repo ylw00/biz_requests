@@ -75,6 +75,14 @@ class Wrapper:
         return cast(Wrapper.F, wrapper)
 
     @staticmethod
+    def add_method_desc(desc):
+        def decorator(func):
+            func.desc = desc
+            return func
+
+        return decorator
+
+    @staticmethod
     def no_exception(func):
         """不异常"""
 
