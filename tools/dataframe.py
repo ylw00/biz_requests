@@ -72,7 +72,6 @@ class Content2df:
             zip_file_list = zip_file.namelist()
             if len(zip_file_list) == 0:
                 return b''
-
             f_list = [file_name] if isinstance(file_name, str) else (file_name or zip_file_list)
             for f in f_list:
                 if f not in zip_file_list:  # 检查文件是否存在
