@@ -70,7 +70,7 @@ class Content2df:
 
         with ZipFile(BytesIO(zip_content), 'r') as zip_file:
             zip_file_list = zip_file.namelist()
-            if len(zip_file_list):
+            if len(zip_file_list) == 0:
                 return b''
 
             f_list = [file_name] if isinstance(file_name, str) else (file_name or zip_file_list)
