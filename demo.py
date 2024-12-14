@@ -15,7 +15,7 @@ from biz_request import BizRequest
 class Tm(BizRequest):
     def __init__(self):
         super(Tm, self).__init__()
-        self.setRequest().setEngine()
+        self.initRequest()  # .initEngine()
 
     @staticmethod
     def parse_respone(response_j: dict):

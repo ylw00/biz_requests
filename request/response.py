@@ -13,7 +13,7 @@ from requests.cookies import extract_cookies_to_jar
 from .headers import Headers
 from tools.wrapper import Wrapper
 from tools.cookies import cookie_str2dict
-from tools.dataframe import Content2DfParamsConfig, content2df
+from tools.dataframe import Content2DfParamsConfig, content2df, non2None
 
 
 def decode_bytes(value):
@@ -68,8 +68,9 @@ class Response(RResponse):
             xlsx_content | xlsx_zip | xlsx_base64
             csv_content | csv_zip | csv_base64
         """
+        non2none = kwargs.pop('non2None', False)
         _d = self.text if 'base64' in c_type else self.content
-        return content2df(c_type, _d, Content2DfParamsConfig(
+        df = content2df(c_type, _d, Content2DfParamsConfig(
             c_type=c_type,
             content=self.content,
             encoding=kwargs.get('encoding', 'utf-8'),
@@ -79,6 +80,7 @@ class Response(RResponse):
             file_name=kwargs.get('file_name'),
             engine=kwargs.get('engine', 'openpyxl'),
         ))
+        return non2None(df) if non2none else df
 
 
 def ResponseSetAttr(self, req, resp) -> Response:

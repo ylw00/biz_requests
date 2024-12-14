@@ -16,7 +16,7 @@ from typing import Union, List, Dict
 
 from tools.wrapper import Wrapper
 
-content_2_df: 'Content2df'
+__content2df: 'Content2df'
 
 
 class ContentTypeEnum(Enum):
@@ -137,8 +137,8 @@ class Content2df:
 
 def content2df(c_type: str, content: Union[bytes, str], p: Content2DfParamsConfig, **kwargs) -> DataFrame:
     """根据 ContentType 转换内容为 DataFrame"""
-    global content_2_df
-    content_2_df = content_2_df or Content2df()
+    global __content2df
+    __content2df = __content2df or Content2df()
     header = p.header
     encoding = p.encoding
     engine = p.engine
@@ -147,22 +147,22 @@ def content2df(c_type: str, content: Union[bytes, str], p: Content2DfParamsConfi
 
     # 根据 content_type 调用相应的处理函数
     if c_type == ContentTypeEnum.xlsx_content.value:
-        return content_2_df.xlsx_content(content, sheet_name, header, engine, **kwargs)
+        return __content2df.xlsx_content(content, sheet_name, header, engine, **kwargs)
 
     if c_type == ContentTypeEnum.xlsx_base64.value:
-        return content_2_df.xlsx_base64(content, sheet_name, header, engine, **kwargs)
+        return __content2df.xlsx_base64(content, sheet_name, header, engine, **kwargs)
 
     if c_type == ContentTypeEnum.xlsx_zip.value:
-        return content_2_df.xlsx_zip(content, file_name, sheet_name, header, engine, **kwargs)
+        return __content2df.xlsx_zip(content, file_name, sheet_name, header, engine, **kwargs)
 
     if c_type == ContentTypeEnum.csv_content.value:
-        return content_2_df.csv_content(content, sheet_name, header, encoding, engine, **kwargs)
+        return __content2df.csv_content(content, sheet_name, header, encoding, engine, **kwargs)
 
     if c_type == ContentTypeEnum.csv_base64.value:
-        return content_2_df.csv_base64(content, sheet_name, header, encoding, engine, **kwargs)
+        return __content2df.csv_base64(content, sheet_name, header, encoding, engine, **kwargs)
 
     if c_type == ContentTypeEnum.csv_zip.value:
-        return content_2_df.csv_zip(content, file_name, sheet_name, header, encoding, engine, **kwargs)
+        return __content2df.csv_zip(content, file_name, sheet_name, header, encoding, engine, **kwargs)
 
     raise ValueError(f"Unsupported content type: {c_type}")
 
