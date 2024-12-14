@@ -69,8 +69,7 @@ class Response(RResponse):
             csv_content | csv_zip | csv_base64
         """
         non2none = kwargs.pop('non2None', False)
-        _d = self.text if 'base64' in c_type else self.content
-        df = content2df(c_type, _d, Content2DfParamsConfig(
+        df = content2df(c_type, self.text if 'base64' in c_type else self.content, Content2DfParamsConfig(
             c_type=c_type,
             content=self.content,
             encoding=kwargs.get('encoding', 'utf-8'),
