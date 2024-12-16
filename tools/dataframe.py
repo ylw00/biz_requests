@@ -12,11 +12,11 @@ from numpy import nan as np_nan
 from enum import Enum
 from dataclasses import dataclass, field
 from base64 import b64decode
-from typing import Union, List, Dict
+from typing import Optional, Union, List, Dict
 
 from tools.wrapper import Wrapper
 
-__content2df: 'Content2df'
+__content2df: Optional['Content2df'] = None
 
 
 class ContentTypeEnum(Enum):
