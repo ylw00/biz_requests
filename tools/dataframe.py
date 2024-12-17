@@ -77,6 +77,8 @@ class Content2df:
 
         with ZipFile(BytesIO(zip_content), 'r') as zip_file:
             zip_file_list = zip_file.namelist()
+            if len(zip_file_list) == 0:
+                return b''
             f_list = [file_name] if isinstance(file_name, str) else (file_name or zip_file_list)
             for f in f_list:
                 if f not in zip_file_list:  # 检查文件是否存在
@@ -100,6 +102,8 @@ class Content2df:
     def xlsx_zip(self, content, file_name, **kwargs):
         """处理压缩的 XLSX 文件"""
         zip_content = self.extract_zip(content, file_name)
+        if not zip_content:
+            return DataFrame()
         if isinstance(zip_content, bytes):
             return self.read_xlsx(BytesIO(zip_content), **kwargs)
         return df_concat(*[
@@ -119,6 +123,8 @@ class Content2df:
     def csv_zip(self, content, encoding, file_name, **kwargs):
         """处理压缩的 CSV 文件"""
         zip_content = self.extract_zip(content, file_name)
+        if not zip_content:
+            return DataFrame()
         if isinstance(zip_content, bytes):
             return self.read_csv(BytesIO(zip_content), encoding=encoding, **kwargs)
         return df_concat(*[
