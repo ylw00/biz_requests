@@ -70,8 +70,6 @@ class Response(RResponse):
         """
         non2none = kwargs.pop('non2None', False)
         df = content2df(c_type, self.text if 'base64' in c_type else self.content, Content2DfParamsConfig(
-            c_type=c_type,
-            content=self.content,
             encoding=kwargs.get('encoding', 'utf-8'),
             dtype=kwargs.get('dtype'),
             sheet_name=kwargs.get('sheet_name', 0),
