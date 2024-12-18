@@ -71,10 +71,10 @@ class Response(RResponse):
         non2none = kwargs.pop('non2None', False)
         df = content2df(c_type, self.text if 'base64' in c_type else self.content, Content2DfParamsConfig(
             encoding=kwargs.get('encoding', 'utf-8'),
-            dtype=kwargs.get('dtype'),
+            dtype=kwargs.get('dtype', None),
             sheet_name=kwargs.get('sheet_name', 0),
             header=kwargs.get('header', 0),
-            file_name=kwargs.get('file_name'),
+            file_name=kwargs.get('file_name', None),
             engine=kwargs.get('engine', 'openpyxl'),
         ))
         return non2None(df) if non2none else df
