@@ -44,7 +44,7 @@ def df_concat(*dfs):
     return concat(dfs, axis=0)
 
 
-def non2None(df: DataFrame, *, fields: str = None) -> DataFrame:
+def non2none(df: DataFrame, *, fields: str = None) -> DataFrame:
     """
     替换 nan 为 None
     """

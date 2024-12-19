@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 from .http1 import CustomAdapterHtt1  # , CustomAdapterHtt2
 from .headers import Headers
 from .response import Response
-from .params import MethodEnum, RequestParams
+from .params import RequestParams
 from tools.wrapper import Wrapper
 
 
@@ -27,7 +27,6 @@ class RequestConfig:
 class Session:
     RP = RequestParams
     RC = RequestConfig
-    M = MethodEnum
 
     def __init__(self, config: Optional[RequestConfig] = None):
         self.__config = config or RequestConfig()
@@ -94,7 +93,7 @@ if __name__ == '__main__':
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
         }), retries=2, delay=2)
         print(_.headers)
-        print(_.resp_cookie())
+        print(_.head_scookie())
         print(_.cookies)
 
 

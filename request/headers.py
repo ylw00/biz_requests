@@ -8,7 +8,7 @@
 from collections import OrderedDict
 from typing import Optional, Union
 
-from tools.cookies import cookie_str2dict
+from tools.cookies import CookieTools
 
 
 # F_PATH = os.path.dirname(__file__)
@@ -82,7 +82,7 @@ class Headers(OrderedDict):
 
         if not isinstance(cookie, str):
             return {}
-        return cookie_str2dict(cookie)
+        return CookieTools.cookie_str2dict(cookie)
 
 
 if __name__ == '__main__':

@@ -12,8 +12,8 @@ from requests.cookies import extract_cookies_to_jar
 
 from .headers import Headers
 from tools.wrapper import Wrapper
-from tools.cookies import cookie_str2dict
-from tools.dataframe import Content2DfParamsConfig, content2df, non2None
+from tools.cookies import CookieTools
+from tools.dataframe import Content2DfParamsConfig, content2df, non2none
 
 
 def decode_bytes(value):
@@ -31,11 +31,11 @@ class Response(RResponse):
         self.__debugger = debugger
         self.__text: Optional[str] = None
 
-    def resp_cookie(self, as_dict: bool = True) -> Union[str, dict]:
+    def head_scookie(self, as_dict: bool = True) -> Union[str, dict]:
         """ 返回response.headers['set-cookie'] """
         _ck = self.headers.get('set-cookie')
         if as_dict:
-            return cookie_str2dict(_ck)
+            return CookieTools.cookie_str2dict(_ck)
         return _ck
 
     def set_encoding(self, encodeing: str):
@@ -68,7 +68,7 @@ class Response(RResponse):
             xlsx_content | xlsx_zip | xlsx_base64
             csv_content | csv_zip | csv_base64
         """
-        non2none = kwargs.pop('non2None', False)
+        __non2none = kwargs.pop('non2none', False)
         df = content2df(c_type, self.text if 'base64' in c_type else self.content, Content2DfParamsConfig(
             encoding=kwargs.get('encoding', 'utf-8'),
             dtype=kwargs.get('dtype', None),
@@ -77,7 +77,7 @@ class Response(RResponse):
             file_name=kwargs.get('file_name', None),
             engine=kwargs.get('engine', 'openpyxl'),
         ))
-        return non2None(df) if non2none else df
+        return non2none(df) if __non2none else df
 
 
 def ResponseSetAttr(self, req, resp) -> Response:
