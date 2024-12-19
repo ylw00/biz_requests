@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 from .http1 import CustomAdapterHtt1  # , CustomAdapterHtt2
 from .headers import Headers
 from .response import Response
-from .params import RequestParams
+from .params import MethodEnum, RequestParams
 from tools.wrapper import Wrapper
 
 
@@ -20,13 +20,23 @@ from tools.wrapper import Wrapper
 class RequestConfig:
     retries: int = field(default=0)  # 请求重试次数
     delay: int = field(default=0)  # 重试间隔
+    encoding: str = field(default=None)  # 返回值文本编码
     headers: dict = field(default_factory=dict)  # 初始化添加header key
     http2: bool = field(default=False)  # 是否使用http2
+
+    def __post_init__(self):
+        if self.retries is None:
+            self.retries = 0
+        if self.delay is None:
+            self.delay = 0
+        if self.http2 is None:
+            self.http2 = False
 
 
 class Session:
     RP = RequestParams
     RC = RequestConfig
+    M = MethodEnum
 
     def __init__(self, config: Optional[RequestConfig] = None):
         self.__config = config or RequestConfig()
@@ -50,39 +60,49 @@ class Session:
         self.session.mount('https://', CustomAdapterHtt1())
 
     def __requests(self, method, url, params=None, data=None, headers=None, cookies=None, timeout=None,
-                   allow_redirects=True, proxies=None, verify=None, json=None) -> Response:
+                   allow_redirects=True, proxies=None, verify=None, json=None, encoding=None) -> Response:
         with self.session.request(
                 method, url, params, data, headers, cookies, timeout=timeout,
                 allow_redirects=allow_redirects, proxies=proxies, verify=verify, json=json
         ) as response:
             response: Response = response
+
+        _encoding = encoding or self.__config.encoding
+        if _encoding:
+            response.encoding = _encoding
         return response
 
     def request(self, method, url, params=None, data=None, headers=None, cookies=None, timeout=None,
-                allow_redirects=True, proxies=None, verify=None, json=None, retries=0, delay=0) -> Response:
+                allow_redirects=True, proxies=None, verify=None, json=None, retries=0, delay=0,
+                encoding=None) -> Response:
         retries = retries or self._retries
         delay = delay or self._delay if retries else 0
-        head = headers or self.headers
+        head = headers if headers is not None else self.headers
 
         # 根据是否需要重试来决定使用哪个请求包装器
         req_wrap = self.__requests if retries == 0 else Wrapper.retry(retries=retries, delay=delay)(self.__requests)
-        return req_wrap(method, url, params, data, head, cookies, timeout, allow_redirects, proxies, verify, json)
+        return req_wrap(
+            method, url, params, data, head, cookies, timeout, allow_redirects, proxies, verify, json, encoding
+        )
 
     def get(self, url, params=None, data=None, headers=None, cookies=None, timeout=None, allow_redirects=True,
-            proxies=None, verify=None, json=None, retries=0, delay=0):
+            proxies=None, verify=None, json=None, retries=0, delay=0, encoding=None):
         return self.request(
-            'get', url, params, data, headers, cookies, timeout, allow_redirects, proxies, verify, json, retries, delay
+            'get', url, params, data, headers, cookies, timeout, allow_redirects, proxies, verify, json,
+            retries, delay, encoding
         )
 
     def post(self, url, params=None, data=None, headers=None, cookies=None, timeout=None, allow_redirects=True,
-             proxies=None, verify=None, json=None, retries=0, delay=0):
+             proxies=None, verify=None, json=None, retries=0, delay=0, encoding=None):
         return self.request(
-            'post', url, params, data, headers, cookies, timeout, allow_redirects, proxies, verify, json, retries, delay
+            'post', url, params, data, headers, cookies, timeout, allow_redirects, proxies, verify, json,
+            retries, delay, encoding
         )
 
 
 if __name__ == '__main__':
     def demo():
+        print(RequestConfig(encoding=None))
         requests = Session(Session.RC())
 
         _ = requests.get(requests.RP(None, "https://spa16.scrape.center/", headers={

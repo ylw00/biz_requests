@@ -19,9 +19,9 @@ class Request:
         self.headers: Optional[Headers] = None
 
     @staticmethod
-    def create_request(retries=0, delay=0, headers=None, http2=False):
+    def create_request(retries=0, delay=0, encoding: Optional[str] = None, headers=None, http2=False):
         return Session(RequestConfig(
-            retries=retries, delay=delay, headers=headers, http2=http2
+            retries=retries, delay=delay, encoding=encoding, headers=headers, http2=http2
         ))
 
     @staticmethod
@@ -30,12 +30,12 @@ class Request:
             dbname=dbname, user=user, pwd=pwd, host=host, port=port, charset=charset
         ))
 
-    def init_request(self, retries=0, delay=0, headers=None, http2=False):
+    def init_request(self, retries=0, delay=0, encoding: Optional[str] = None, headers=None, http2=False):
         if hasattr(self, 'request') and isinstance(self.request, Session):
             logger.info("禁止重复初始化 `Request`;")
             return self
 
-        self.request = self.create_request(retries, delay, headers, http2)
+        self.request = self.create_request(retries, delay, encoding, headers, http2)
         self.headers = self.request.headers
         return self
 
