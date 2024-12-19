@@ -55,7 +55,7 @@ class Response(RResponse):
         return super(Response, self).json()
 
     @Wrapper.save_req_error
-    def jsonp2json(self) -> dict:
+    def jsonp(self) -> dict:
         """jsonp 转 json"""
         _text = self.text
         return json_loads(_text[_text.find('{'):_text.rfind('}') + 1])
