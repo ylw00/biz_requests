@@ -13,12 +13,14 @@ from .biz_request import BizRequest
 from .request.headers import Headers
 from .db_engine.engine import Engine
 from .tools.wrapper import Wrapper
+from .tools.cookies import CookieTools
 
 __all__ = [
     'BizRequest',
     'Headers',
     'Engine',
     'Wrapper',
+    'CookieTools'
 ]
 
 
