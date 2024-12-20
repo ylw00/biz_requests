@@ -50,17 +50,17 @@ class Response(RResponse):
             self.__text = super().text
         return self.__text
 
-    @Wrapper.save_req_error
+    @Wrapper.log_text_if_exception
     def json(self, *args, **kwargs) -> dict:
         return super(Response, self).json()
 
-    @Wrapper.save_req_error
+    @Wrapper.log_text_if_exception
     def jsonp(self) -> dict:
         """jsonp 转 json"""
         _text = self.text
         return json_loads(_text[_text.find('{'):_text.rfind('}') + 1])
 
-    @Wrapper.save_req_error
+    @Wrapper.log_text_if_exception
     def dataframe(self, c_type: str, **kwargs) -> pd.DataFrame:
         """
         二进制报表类型下载

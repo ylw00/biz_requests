@@ -158,7 +158,7 @@ class Wrapper:
         return decorator
 
     @staticmethod
-    def save_req_error(func):
+    def log_text_if_exception(func):
 
         @wraps(func)
         def wrapper(self, *args, **kwargs):
@@ -171,7 +171,7 @@ class Wrapper:
         return cast(Wrapper.F, wrapper)
 
     @staticmethod
-    def save_resp_error(func):
+    def log_resp_if_exception(func):
         cache_key = md5(f"{id(func)}").hexdigest()
         if cache_key in Wrapper.__cache:
             return Wrapper.__cache.get(cache_key)

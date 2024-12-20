@@ -71,7 +71,7 @@ class BizRequest(Request):
     @staticmethod
     def safe_parse(callback_func: Callable, *args, **kwargs):
         """安全的解析"""
-        return Wrapper.save_resp_error(callback_func)(*args, **kwargs)
+        return Wrapper.log_resp_if_exception(callback_func)(*args, **kwargs)
 
     def save2db(self, item: Union[dict, List[dict], DataFrame]):
         """数据入库"""
