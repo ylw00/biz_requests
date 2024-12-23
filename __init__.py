@@ -10,6 +10,7 @@
 # sys.path.append(os.path.join(F_PATH, '..'))
 # sys.path.append(os.path.join(F_PATH, '../..'))
 from .biz_request import BizRequest
+from .request.session import Session
 from .request.headers import Headers
 from .db_engine.engine import Engine
 from .tools.wrapper import Wrapper
@@ -17,6 +18,7 @@ from .tools.cookies import CookieTools
 
 __all__ = [
     'BizRequest',
+    'Session',
     'Headers',
     'Engine',
     'Wrapper',
