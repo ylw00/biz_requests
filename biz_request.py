@@ -31,10 +31,6 @@ class Request:
         ))
 
     def init_request(self, retries=0, delay=0, encoding: Optional[str] = None, headers=None, http2=False):
-        if hasattr(self, 'request') and isinstance(self.request, Session):
-            logger.info("禁止重复初始化 `Request`;")
-            return self
-
         self.request = self.create_request(retries, delay, encoding, headers, http2)
         self.headers = self.request.headers
         return self
