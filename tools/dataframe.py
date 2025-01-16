@@ -63,8 +63,11 @@ class Content2df:
 
     @staticmethod
     @Wrapper.ignore_resource_warnings
-    def read_xlsx(content: Union[bytes, BytesIO], **kwargs) -> DataFrame:
-        return read_excel(content, **kwargs)
+    def read_xlsx(content: bytes, **kwargs) -> DataFrame:
+        if 'PK' not in str(content[:2]).upper():
+            kwargs['engine'] = None  # 非压缩文件使用 openpyxl 会报错
+
+        return read_excel(BytesIO(content), **kwargs)
 
     @staticmethod
     def read_csv(content: Union[bytes, BytesIO], encoding='utf-8', **kwargs) -> DataFrame:
@@ -92,12 +95,12 @@ class Content2df:
 
     def xlsx_content(self, content, **kwargs):
         """处理字节 XLSX 内容"""
-        return self.read_xlsx(BytesIO(content), **kwargs)
+        return self.read_xlsx(content, **kwargs)
 
     def xlsx_base64(self, content, **kwargs):
         """处理 base64 编码的 XLSX 内容"""
         decoded_content = self._parse_base64(content)
-        return self.read_xlsx(BytesIO(decoded_content), **kwargs)
+        return self.read_xlsx(decoded_content, **kwargs)
 
     def xlsx_zip(self, content, file_name, **kwargs):
         """处理压缩的 XLSX 文件"""
@@ -105,11 +108,8 @@ class Content2df:
         if not zip_content:
             return DataFrame()
         if isinstance(zip_content, bytes):
-            return self.read_xlsx(BytesIO(zip_content), **kwargs)
-        return df_concat(*[
-            self.read_xlsx(BytesIO(c), **kwargs)
-            for c in zip_content.values()
-        ])
+            return self.read_xlsx(zip_content, **kwargs)
+        return df_concat(*[self.read_xlsx(c, **kwargs) for c in zip_content.values()])
 
     def csv_content(self, content, encoding='utf-8', **kwargs):
         """处理字节 CSV 内容"""
