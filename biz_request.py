@@ -69,14 +69,14 @@ class BizRequest(Request):
         """安全的解析"""
         return Wrapper.log_resp_if_exception(callback_func)(*args, **kwargs)
 
-    def save2db(self, item: Union[dict, List[dict], DataFrame]):
+    def save2db(self, *args, **kwargs):
         """数据入库"""
 
-    def init_attribute(self):
+    def init_attributes(self, *args, **kwargs):
         """初始化属性到self"""
         ...
 
-    def start(self):
+    def start(self, *args, **kwargs):
         """主入口函数"""
         ...
 
