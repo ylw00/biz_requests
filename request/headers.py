@@ -44,8 +44,11 @@ class Headers(OrderedDict):
         return super(Headers, self).__setitem__(key, value)
 
     def __delitem__(self, key):
-        key = key.lower()
-        return super(Headers, self).pop(key, None) is not None
+        try:
+            super(Headers, self).__delitem__(key.lower())
+            return True
+        except KeyError:
+            return False
 
     def get(self, __key: str):
         __key = __key.lower()
