@@ -3,45 +3,10 @@
 # @file: request
 # @time: 2024/12/10
 # @desc:
-from loguru import logger
-from pandas import DataFrame
-from typing import Optional, Callable, Union, List
+from typing import Callable
 
-from request import Headers, Session, RequestConfig
-from db_engine import Engine, EngineConfig
+from request import Request
 from tools.wrapper import Wrapper
-
-
-class Request:
-    def __init__(self):
-        self.request: Optional[Session] = None
-        self.engine: Optional[Engine] = None
-        self.headers: Optional[Headers] = None
-
-    @staticmethod
-    def create_request(retries=0, delay=0, encoding: Optional[str] = None, headers=None, http2=False):
-        return Session(RequestConfig(
-            retries=retries, delay=delay, encoding=encoding, headers=headers, http2=http2
-        ))
-
-    @staticmethod
-    def create_engine(dbname, user, pwd, host, port, charset: str = 'utf8mb4'):
-        return Engine(EngineConfig(
-            dbname=dbname, user=user, pwd=pwd, host=host, port=port, charset=charset
-        ))
-
-    def init_request(self, retries=0, delay=0, encoding: Optional[str] = None, headers=None, http2=False):
-        self.request = self.create_request(retries, delay, encoding, headers, http2)
-        self.headers = self.request.headers
-        return self
-
-    def init_engine(self, dbname, user, pwd, host, port, charset: str = 'utf8mb4'):
-        if hasattr(self, 'engine') and isinstance(self.engine, Engine):
-            logger.info("禁止重复初始化 `Engine`;")
-            return self
-
-        self.engine = self.create_engine(dbname, user, pwd, host, port, charset)
-        return self
 
 
 class BizRequest(Request):

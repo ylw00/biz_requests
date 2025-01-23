@@ -9,7 +9,8 @@
 # F_PATH = os.path.dirname(__file__)
 # sys.path.append(os.path.join(F_PATH, '..'))
 # sys.path.append(os.path.join(F_PATH, '../..'))
-from .session import RequestConfig, Session
+from .session import SessionConfig, Session
+from .request import Request
 from .response import Content2DfParamsConfig, content2df
 from .params import MethodEnum
 from .headers import Headers
@@ -17,7 +18,8 @@ from .headers import Headers
 
 __all__ = [
     'Session',
-    'RequestConfig',
+    'SessionConfig',
+    'Request',
     'MethodEnum',
     'Headers',
     'Content2DfParamsConfig',

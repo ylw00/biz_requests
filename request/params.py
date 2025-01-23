@@ -28,7 +28,7 @@ class MethodEnum(Enum):
 
 
 @dataclass
-class RequestParams:
+class SessionParams:
     method: Optional[MethodEnum] = None
     url: Optional[str] = None
     headers: Optional[Dict[str, str]] = None
@@ -48,7 +48,7 @@ class RequestParams:
 
 if __name__ == '__main__':
     def demo():
-        aa = RequestParams()
+        aa = SessionParams()
         aa.method = 111
         print(aa.method)
 

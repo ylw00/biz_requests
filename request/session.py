@@ -12,15 +12,14 @@ from dataclasses import dataclass, field
 from .http1 import CustomAdapterHtt1  # , CustomAdapterHtt2
 from .headers import Headers
 from .response import Response
-from .params import MethodEnum, RequestParams
 from tools.wrapper import Wrapper
 
 
 @dataclass
-class RequestConfig:
+class SessionConfig:
     retries: int = field(default=0)  # 请求重试次数
     delay: int = field(default=0)  # 重试间隔
-    encoding: str = field(default=None)  # 返回值文本编码
+    encoding: Optional[str] = field(default=None)  # 返回值文本编码
     headers: dict = field(default_factory=dict)  # 初始化添加header key
     http2: bool = field(default=False)  # 是否使用http2
 
@@ -34,12 +33,9 @@ class RequestConfig:
 
 
 class Session:
-    RP = RequestParams
-    RC = RequestConfig
-    M = MethodEnum
 
-    def __init__(self, config: Optional[RequestConfig] = None):
-        self.__config = config or RequestConfig()
+    def __init__(self, config: Optional[SessionConfig] = None):
+        self.__config = config or SessionConfig()
         self._retries = self.__config.retries
         self._delay = self.__config.delay
 
@@ -102,10 +98,11 @@ class Session:
 
 if __name__ == '__main__':
     def demo():
-        print(RequestConfig(encoding=None))
-        requests = Session(Session.RC())
+        from .params import SessionParams
 
-        _ = requests.get(requests.RP(None, "https://spa16.scrape.center/", headers={
+        requests = Session(SessionConfig())
+
+        _ = requests.get(SessionParams(None, "https://spa16.scrape.center/", headers={
             'accept': 'application/json, text/plain, */*',
             'accept-encoding': 'gzip, deflate, br, zstd',
             'accept-language': 'zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7',

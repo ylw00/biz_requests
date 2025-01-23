@@ -6,7 +6,7 @@
 import pandas as pd
 from json import loads as json_loads
 from typing import Optional, Union
-from requests.models import Response as RResponse
+from requests.models import Response
 from requests.utils import get_encoding_from_headers
 from requests.cookies import extract_cookies_to_jar
 
@@ -20,14 +20,14 @@ def decode_bytes(value):
     return value.decode() if isinstance(value, bytes) else value
 
 
-class Response(RResponse):
+class BizResponse(Response):
     """
     在这里拓展返回数据类型/封装
     """
     headers: Optional[Headers] = None
 
     def __init__(self, debugger: bool = False):
-        super(Response, self).__init__()
+        super(BizResponse, self).__init__()
         self.__debugger = debugger
         self.__text: Optional[str] = None
 
@@ -38,7 +38,7 @@ class Response(RResponse):
             return CookieTools.cookie_str2dict(_ck)
         return _ck
 
-    def set_encoding(self, encodeing: str):
+    def set_encoding(self, encodeing: str) -> 'BizResponse':
         """设置文本编码, 并返回self, 支持链式调用"""
         self.encoding = encodeing
         self.__text = None
@@ -52,7 +52,7 @@ class Response(RResponse):
 
     @Wrapper.log_text_if_exception
     def json(self, *args, **kwargs) -> dict:
-        return super(Response, self).json()
+        return super(BizResponse, self).json()
 
     @Wrapper.log_text_if_exception
     def jsonp(self) -> dict:
@@ -80,8 +80,8 @@ class Response(RResponse):
         return non2none(df) if __non2none else df
 
 
-def ResponseSetAttr(self, req, resp) -> Response:
-    response = Response()
+def ResponseSetAttr(self, req, resp) -> BizResponse:
+    response = BizResponse()
 
     response.status_code = getattr(resp, "status", None)
     response.headers = Headers({decode_bytes(k): decode_bytes(v) for k, v in getattr(resp, "headers", {}).items()})

@@ -9,11 +9,7 @@ from requests.adapters import HTTPAdapter
 # from hyper.contrib import HTTP20Adapter
 
 from .response import ResponseSetAttr
-
-
 # from hyper_development.hyper.contrib import HTTP20Adapter
-
-
 # F_PATH = os.path.dirname(__file__)
 # sys.path.append(os.path.join(F_PATH, '..'))
 # sys.path.append(os.path.join(F_PATH, '../..'))

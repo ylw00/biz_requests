@@ -43,6 +43,6 @@ if __name__ == '__main__':
         print(_.cookies)
 
 
-    # demo()
+    demo()
 
-    Tm().crawl_response()
+    # Tm().crawl_response()
