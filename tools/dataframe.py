@@ -71,7 +71,12 @@ class Content2df:
 
     @staticmethod
     def read_csv(content: Union[bytes, BytesIO], encoding='utf-8', **kwargs) -> DataFrame:
-        return read_csv(content, encoding=encoding, **kwargs)
+        n_kwargs = kwargs.copy()
+        # 删除两个 read_csv 不支持的参数
+        del n_kwargs['sheet_name']
+        del n_kwargs['engine']
+
+        return read_csv(content, encoding=encoding, **n_kwargs)
 
     @staticmethod
     def extract_zip(zip_content: bytes, file_name: Union[str, List[str]]) -> Union[bytes, Dict[str, bytes]]:
