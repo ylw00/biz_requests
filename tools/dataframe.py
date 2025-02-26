@@ -32,8 +32,8 @@ class ContentTypeEnum(Enum):
 @dataclass
 class Content2DfParamsConfig:
     encoding: Union[str, List[str]] = field(default='utf-8')
-    thousands: Union[str] = field(default=None)
-    dtype: Union[dict] = field(default=None)
+    thousands: Optional[str] = field(default=None)
+    dtype: Optional[dict] = field(default=None)
     sheet_name: Union[str, int, List[str], List[int]] = field(default=0)
     header: int = field(default=0)
     file_name: Union[str, List[str]] = field(default=None)  # 只针对于 zip 压缩文件
