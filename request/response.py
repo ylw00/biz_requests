@@ -71,6 +71,7 @@ class BizResponse(Response):
         __non2none = kwargs.pop('non2none', False)
         df = content2df(c_type, self.text if 'base64' in c_type else self.content, Content2DfParamsConfig(
             encoding=kwargs.get('encoding', 'utf-8'),
+            thousands=kwargs.get('thousands', None),
             dtype=kwargs.get('dtype', None),
             sheet_name=kwargs.get('sheet_name', 0),
             header=kwargs.get('header', 0),
