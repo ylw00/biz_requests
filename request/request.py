@@ -36,7 +36,7 @@ class Request:
 
     def init_request(self, retries=0, delay=0, encoding: Optional[str] = None, headers=None, http2=False):
         self.request = self.create_request(retries, delay, encoding, headers, http2)
-        self.headers = self.request.headers
+        self.headers = self.headers or self.request.headers
         return self
 
     def init_engine(self, dbname, user, pwd, host, port, charset: str = 'utf8mb4'):
