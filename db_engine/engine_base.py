@@ -7,6 +7,7 @@
 # import os
 from urllib import parse
 from functools import wraps
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from typing import TypeVar, Callable, Any, cast, ContextManager, Optional
 
@@ -77,6 +78,12 @@ class EngineBase:
         if sqlalchemy_version.startswith('2.'):
             return self.engine.begin(close_with_result=close_with_result)
         return self.engine.connect(close_with_result=close_with_result)
+
+    @contextmanager
+    def with_connect_begin(self) -> ContextManager:
+        with self.get_connect() as conn:
+            with conn.begin():
+                yield conn
 
     def with_switch_db(self, dbname: str) -> ContextManager:
         return SwitchDB(self.engine, dbname, current_dbname=self.__dbname)

@@ -12,17 +12,24 @@ from sqlalchemy.sql import text as sqlalchemy_text
 from sqlalchemy.engine import Connection
 from sqlalchemy.exc import IntegrityError
 
-from .engine_base import EngineBase
+from .engine_base import EngineBase, EngineConfig
 from .engine_business_tools import EngineBusinessTools
-
 
 # F_PATH = os.path.dirname(__file__)
 # sys.path.append(os.path.join(F_PATH, '..'))
 # sys.path.append(os.path.join(F_PATH, '../..'))
 
+SPECIAL_CHARACTERS = [i.lower() for i in [  # 特殊字符, 需要加上 ``
+    'convert',
+    'show',
+    'rank',
+    'grant',
+]]
+
+
 class Engine(EngineBase):
 
-    def __init__(self, engine_config: EngineBase.engine_config):
+    def __init__(self, engine_config: EngineConfig):
         super(Engine, self).__init__(engine_config)
         self.__business_tools: Optional[EngineBusinessTools] = None  # 懒加载
 
@@ -34,18 +41,23 @@ class Engine(EngineBase):
         return self.__business_tools
 
     @staticmethod
-    def tool_insert_dict2sql(data: dict, table: str) -> str:
-        keys = list(data.keys())
-        col = ','.join(keys)
-        placeholder = ', '.join(['%s'] * len(keys))
-        return f"""insert into {table} ({col}) values ({placeholder});"""
+    def __dict2sql(symbol: str, data: dict, table: str) -> str:
+        keys: List[str] = list(data.keys())
+        for i in range(len(keys)):  # 处理特殊字符
+            v = keys[i].lower()
+            if v not in SPECIAL_CHARACTERS:
+                continue
+            keys[i] = f'`{v}`'
 
-    @staticmethod
-    def tool_replace_dict2sql(data: dict, table: str) -> str:
-        keys = list(data.keys())
-        col = ','.join(keys)
+        col = ' , '.join(keys).lower()
         placeholder = ', '.join(['%s'] * len(keys))
-        return f"""replace into {table} ({col}) values ({placeholder});"""
+        return f"""{symbol} into {table} ({col}) values ({placeholder});"""
+
+    def tool_insert_dict2sql(self, data: dict, table: str) -> str:
+        return self.__dict2sql("insert", data, table)
+
+    def tool_replace_dict2sql(self, data: dict, table: str) -> str:
+        return self.__dict2sql("replace", data, table)
 
     @staticmethod
     def __c_execute(sql: str, values: Optional[tuple] = None, *, conn: Connection, safe_ignorePK: bool = False) -> bool:
@@ -58,17 +70,8 @@ class Engine(EngineBase):
             raise e
         return True
 
-    def execute_onesql(self, sql: str, values: Optional[tuple] = None, conn: Optional[Connection] = None) -> bool:
-        """执行一个sql语句"""
-        if isinstance(conn, Connection):
-            conn.execute(sql, values) if values else conn.execute(sqlalchemy_text(sql))
-            return True
-
-        with self.get_connect() as conn:
-            conn.execute(sql, values) if values else conn.execute(sqlalchemy_text(sql))
-        return True
-
     def insert_execute(self, item: Union[dict, List[dict]], *, table: str, safe_ignorePK=False, conn: Connection):
+        """执行insert逻辑"""
         data_list = [item] if isinstance(item, dict) else item
         if not isinstance(data_list, list):
             raise ValueError("Invalid input type, expected dict, list of dicts")
@@ -80,12 +83,24 @@ class Engine(EngineBase):
             sql = self.tool_insert_dict2sql(data, table)
             self.__c_execute(sql, tuple(data.values()), conn=conn, safe_ignorePK=safe_ignorePK)
 
+    def execute_onesql(self, sql: str, values: Optional[tuple] = None, conn: Optional[Connection] = None) -> bool:
+        """执行一个sql语句"""
+        if isinstance(conn, Connection):
+            conn.execute(sql, values) if values else conn.execute(sqlalchemy_text(sql))
+            return True
+
+        with self.get_connect() as conn:
+            conn.execute(sql, values) if values else conn.execute(sqlalchemy_text(sql))
+        return True
+
     def replace_execute(self, item: Union[dict, List[dict], pd.DataFrame], *, table: str, conn: Connection):
         if isinstance(item, dict):
             data_list = [item]
         elif isinstance(item, list):
             data_list = item
         elif isinstance(item, pd.DataFrame):
+            if item.empty:
+                return
             data_list = item.to_dict('records')
         else:
             raise ValueError("Invalid input type, expected dict, list of dicts, or DataFrame.")
@@ -107,30 +122,24 @@ class Engine(EngineBase):
             return True
 
         with self.get_connect() as conn:
-            df.to_sql(table, conn, if_exists='append', index=False, schema=schema, chunksize=20000)
+            with conn.begin():
+                df.to_sql(table, conn, if_exists='append', index=False, schema=schema, chunksize=20000)
         return True
 
-    def insert_data2table(self, item: Union[dict, List[dict]], *, table: str, safe_ignorePK=False):
+    def insert_data2table(self, item: Union[dict, List[dict], pd.DataFrame], *, table: str, safe_ignorePK=False):
         """执行【insert】操作"""
+
         with self.get_connect() as conn:
             self.insert_execute(item, table=table, safe_ignorePK=safe_ignorePK, conn=conn)
 
-    def txn_insert_data2table(self, item: Union[dict, List[dict]], *, table: str, safe_ignorePK=False):
-        """事务 执行【insert】操作"""
-        return self.with_txn_wrapper(self.insert_execute)(item, table=table, safe_ignorePK=safe_ignorePK)
-
-    def replace_data2table(self, item: Union[dict, List[dict], pd.DataFrame], *, table: str):
+    def replace_data2table(self, item: Union[dict, List[dict], pd.DataFrame], *, table: str,
+                           conn: Optional[Connection] = None):
         """执行【replace】操作"""
-        with self.get_connect() as conn:
+        if isinstance(conn, Connection):
             return self.replace_execute(item, table=table, conn=conn)
 
-    def txn_replace_data2table(self, item: Union[dict, List[dict], pd.DataFrame], *, table: str):
-        """事务 执行【replace】操作"""
-        return self.with_txn_wrapper(self.replace_execute)(item, table=table)
-
-    def txn_callback(self, func: Callable, *args, **kwargs) -> Any:
-        """事务 回调 自动添加关键词参数【conn】"""
-        return self.with_txn_wrapper(func)(*args, **kwargs)
+        with self.get_connect() as conn:
+            return self.replace_execute(item, table=table, conn=conn)
 
     def fetch_data(self, sql: str, fetch_number: Optional[int] = None) -> List[dict]:
         _fetch_number = fetch_number if isinstance(fetch_number, int) and fetch_number > 0 else -1
@@ -143,22 +152,28 @@ class Engine(EngineBase):
         with self.get_connect() as conn:
             return pd.read_sql(sql, conn)
 
+    def txn_callback(self, func: Callable, *args, **kwargs) -> Any:
+        """事务 回调 自动添加关键词参数【conn】"""
+        return self.with_txn_wrapper(func)(*args, **kwargs)
+
+    def txn_insert_data2table(self, item: Union[dict, List[dict]], *, table: str, safe_ignorePK=False):
+        """事务 执行【insert】操作"""
+        return self.with_txn_wrapper(self.insert_execute)(item, table=table, safe_ignorePK=safe_ignorePK)
+
+    def txn_replace_data2table(self, item: Union[dict, List[dict], pd.DataFrame], *, table: str):
+        """事务 执行【replace】操作"""
+        return self.with_txn_wrapper(self.replace_execute)(item, table=table)
+
+
+def create_engine(dbname, user, pwd, host, port, charset: str = 'utf8mb4'):
+    return Engine(EngineConfig(
+        dbname=dbname, user=user, pwd=pwd, host=host, port=port, charset=charset
+    ))
+
 
 if __name__ == '__main__':
     def demo_func():
-        engine = Engine('spider')
-        # data = [{'id': 112, 'name': 222}]
-        # engine.insert_data2table(data, table='demo_rollback')
-        #
-        # with engine.with_switch_db('ulike_tmall'):
-        #     engine.insert_data2table(data, table='demo_rollback')
-        #
-        # engine.insert_data2table({'id': 1123, 'name': 2223}, table='demo_rollback')
-        sql = 'update demo_rollback set id="1211" where id="1213";'
-        df = pd.DataFrame([{'id': 456, 'name': 222}])
-        # engine.execute_onesql(sql)
-
-        engine.business_tools.txn_execute_sql_then_insert(sql, df, table='demo_rollback')
+        ...
 
 
     demo_func()
