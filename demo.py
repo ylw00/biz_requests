@@ -2,13 +2,17 @@
 from __future__ import annotations
 
 import json
+import sys
 import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from pathlib import Path
 from typing import Any, Dict, Tuple
 
-from biz_request import BizRequest, Headers, Session
-from request.params import MethodEnum, SessionParams
-from request.response import BizResponse
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from biz_requests import BizRequest, Headers, Session
+from biz_requests.request.params import MethodEnum, SessionParams
+from biz_requests.request.response import BizResponse
 
 
 class DemoRequest(BizRequest):

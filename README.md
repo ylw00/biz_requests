@@ -1,8 +1,24 @@
 # BizRequests
 
-`BizRequests` 是一个面向工作脚本的同步 HTTP 请求封装库，调用风格尽量贴近 `requests`，在常见业务取数场景里减少重复代码。
+`BizRequests` 是一个面向业务脚本的同步 HTTP 请求封装库，调用风格尽量贴近 `requests`，用于减少业务取数、报表下载、响应解析和异常日志处理中的重复代码。
 
-当前版本已经将底层请求内核替换为 `curl_cffi.requests`，上层 API、调用方式、返回对象辅助方法和异常日志行为保持兼容，同时保留浏览器指纹伪装、JA3/Akamai 指纹和 HTTP/2 能力。
+当前版本已经将底层请求内核替换为 `curl_cffi.requests`。上层 API、调用方式、返回对象辅助方法和异常日志行为保持兼容，同时保留浏览器指纹伪装、JA3/Akamai 指纹和 HTTP/2 能力。
+
+## 推荐入口
+
+新代码统一使用正式包入口：
+
+```python
+from biz_requests import BizRequest, Session, Headers, Wrapper
+```
+
+旧脚本仍可继续使用：
+
+```python
+from biz_request import BizRequest, Session, Headers, Wrapper
+```
+
+`biz_request.py` 现在只是兼容转发层，真实实现已经迁移到 `core.py`。旧入口会优先转发到 `biz_requests.core.BizRequest`，避免同一进程里混用新旧入口时出现两个不同的 `BizRequest` 类对象。
 
 ## 特性
 
@@ -14,7 +30,7 @@
 - `BizResponse.dataframe()` 支持二进制报表和 base64 报表转 `pandas.DataFrame`。
 - `BizResponse.head_scookie()` 直接解析响应头里的 `set-cookie`。
 - `Headers` 忽略 key 大小写，并提供 `copy()`、`cookie()` 辅助方法。
-- `Wrapper.retry_until_done()`、`safe_parse()` 等业务脚本常用装饰器。
+- `Wrapper.retry_until_done()`、`safe_parse()` 等业务脚本常用工具。
 - 可选 MySQL/SQLAlchemy 工具封装。
 
 ## 安装依赖
@@ -40,7 +56,7 @@ SQLAlchemy>=1.4.7
 `BizRequest` 不能直接实例化，需要继承后使用。
 
 ```python
-from biz_request import BizRequest
+from biz_requests import BizRequest
 
 
 class DemoRequest(BizRequest):
@@ -65,7 +81,7 @@ print(resp.headers)
 
 ## 请求 API
 
-### 创建请求会话
+### 初始化请求会话
 
 ```python
 self.init_request(
@@ -115,7 +131,7 @@ resp = biz.request.post(
 也支持 `SessionParams`：
 
 ```python
-from request.params import MethodEnum, SessionParams
+from biz_requests.request.params import MethodEnum, SessionParams
 
 resp = biz.request.request(SessionParams(
     method=MethodEnum.GET,
@@ -181,7 +197,7 @@ df = resp.dataframe("csv_base64", encoding="utf-8", non2none=True)
 `Headers` 对 key 大小写不敏感。
 
 ```python
-from biz_request import Headers
+from biz_requests import Headers
 
 headers = Headers({"User-Agent": "Mozilla/5.0", "Cookie": "a=1; b=2"})
 
@@ -195,7 +211,7 @@ new_headers = headers.copy(value={"accept": "application/json"})
 ## Wrapper 工具
 
 ```python
-from biz_request import Wrapper
+from biz_requests import Wrapper
 
 
 @Wrapper.retry_until_done(retries=5, delay=6, desc="报表导出")
@@ -244,7 +260,10 @@ JSONP: {'ok': True, 'type': 'jsonp'}
 - 新增 `curl_cffi` 指纹参数透传：`impersonate`、`ja3`、`akamai`、`extra_fp`。
 - `http2=True` 时默认使用 `CurlHttpVersion.V2_0`。
 - 保留原 `BizResponse` 辅助方法和返回格式。
-- 保留原 `BizRequest`、`Session`、`Headers`、`Wrapper`、`CookieTools` 对外导入方式。
+- 明确 `biz_requests` 为正式包入口。
+- 将 `BizRequest` 真实实现迁移到 `core.py`。
+- `biz_request.py` 调整为旧脚本兼容转发层，继续支持 `from biz_request import ...`。
+- 旧入口会转发到正式包实现，避免新旧入口混用造成类对象不一致。
 - 修正包导入和旧式脚本导入兼容性。
 - 新增 `requirements.txt`。
 - 将 `demo.py` 改为稳定的本地回归测试脚本。
@@ -252,7 +271,9 @@ JSONP: {'ok': True, 'type': 'jsonp'}
 ## 项目结构
 
 ```text
-biz_request.py          # 业务入口基类
+__init__.py             # 正式公开 API 入口
+core.py                 # BizRequest 业务入口基类
+biz_request.py          # 旧脚本兼容转发层
 request/session.py      # curl_cffi 请求会话封装
 request/response.py     # BizResponse 响应封装
 request/headers.py      # Headers 封装
