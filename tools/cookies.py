@@ -1,25 +1,21 @@
 # -*- coding: UTF-8 -*-
-# @author: ylw
-# @file: cookies
-# @time: 2024/12/10
-# @desc:
-# import sys
-# import os
+from __future__ import annotations
 
-# F_PATH = os.path.dirname(__file__)
-# sys.path.append(os.path.join(F_PATH, '..'))
-# sys.path.append(os.path.join(F_PATH, '../..'))
+from typing import Dict, Optional
 
 
 class CookieTools:
 
     @staticmethod
-    def cookie_dict2str(dict_cookie: dict) -> str:
+    def cookie_dict2str(dict_cookie: Dict[str, str]) -> str:
         return ';'.join([f'{k}={v}' for k, v in dict_cookie.items()])
 
     @staticmethod
-    def cookie_str2dict(str_cookie: str) -> dict:
-        ck_dict = {}
+    def cookie_str2dict(str_cookie: Optional[str]) -> Dict[str, str]:
+        if not isinstance(str_cookie, str):
+            return {}
+
+        ck_dict: Dict[str, str] = {}
         str_cookie_split = []
         for i in str_cookie.split(';'):
             for j in i.split(','):

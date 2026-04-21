@@ -1,48 +1,127 @@
 # -*- coding: UTF-8 -*-
-# @author: ylw
-# @file: demo
-# @time: 2024/12/10
-# @desc:
-# import sys
-# import os
+from __future__ import annotations
 
-# F_PATH = os.path.dirname(__file__)
-# sys.path.append(os.path.join(F_PATH, '..'))
-# sys.path.append(os.path.join(F_PATH, '../..'))
-from biz_request import BizRequest
+import json
+import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from typing import Any, Dict, Tuple
 
-
-class Tm(BizRequest):
-    def __init__(self):
-        super(Tm, self).__init__()
-        self.init_request()  # .initEngine()
-
-    @staticmethod
-    def parse_respone(response_j: dict):
-        return response_j['aaa']
-
-    def crawl_response(self):
-        data = {'aaa': 111}
-        print(self.safe_retry_until_done(self.parse_respone, data))
-        print(self.safe_retry_until_done(self.parse_respone, {'aa': 11111}))
+from biz_request import BizRequest, Headers, Session
+from request.params import MethodEnum, SessionParams
+from request.response import BizResponse
 
 
-if __name__ == '__main__':
-    def demo():
-        requests = Tm().request
-
-        _ = requests.get("https://www.baidu.com", headers={
-            'accept': 'application/json, text/plain, */*',
-            'accept-encoding': 'gzip, deflate, br, zstd',
-            'accept-language': 'zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7',
-            'priority': 'u=1, i',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
-        }, delay=3, retries=2)
-        print(_.headers)
-        print(_.head_scookie())
-        print(_.cookies)
+class DemoRequest(BizRequest):
+    def __init__(self) -> None:
+        super().__init__()
+        self.init_request(
+            retries=1,
+            delay=0,
+            headers={"x-demo": "biz_requests"},
+            http2=True,
+            impersonate="chrome",
+        )
 
 
+class DemoHandler(BaseHTTPRequestHandler):
+    def do_GET(self) -> None:
+        if self.path.startswith("/jsonp"):
+            self._send_text('callback({"ok": true, "type": "jsonp"})')
+            return
+
+        self._send_json({
+            "ok": True,
+            "method": "GET",
+            "path": self.path,
+            "x_demo": self.headers.get("x-demo"),
+        })
+
+    def do_POST(self) -> None:
+        length = int(self.headers.get("content-length", "0"))
+        body = self.rfile.read(length) if length else b""
+        self._send_json({
+            "ok": True,
+            "method": "POST",
+            "body": body.decode("utf-8"),
+        })
+
+    def log_message(self, *_args: Any) -> None:
+        pass
+
+    def _send_json(self, payload: Dict[str, Any]) -> None:
+        body = json.dumps(payload).encode("utf-8")
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Set-Cookie", "token=abc; Path=/; HttpOnly")
+        self.end_headers()
+        self.wfile.write(body)
+
+    def _send_text(self, text: str) -> None:
+        self.send_response(200)
+        self.send_header("Content-Type", "text/javascript; charset=utf-8")
+        self.end_headers()
+        self.wfile.write(text.encode("utf-8"))
+
+
+def start_server() -> Tuple[HTTPServer, str]:
+    server = HTTPServer(("127.0.0.1", 0), DemoHandler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    return server, f"http://127.0.0.1:{server.server_port}"
+
+
+def assert_equal(actual: Any, expected: Any, name: str) -> None:
+    if actual != expected:
+        raise AssertionError(f"{name}: expected {expected!r}, got {actual!r}")
+
+
+def demo() -> None:
+    server, base_url = start_server()
+    biz = DemoRequest()
+    request = biz.request
+    assert isinstance(request, Session)
+
+    get_resp = request.get(f"{base_url}/json", timeout=5)
+    assert isinstance(get_resp, BizResponse)
+    assert_equal(get_resp.status_code, 200, "GET status_code")
+    assert_equal(get_resp.json()["x_demo"], "biz_requests", "default headers")
+    assert_equal(get_resp.head_scookie(), {"token": "abc"}, "head_scookie")
+
+    post_resp = request.post(f"{base_url}/submit", json={"name": "curl_cffi"}, timeout=5)
+    assert_equal(post_resp.json()["method"], "POST", "POST method")
+
+    params_resp = request.request(SessionParams(
+        method=MethodEnum.GET,
+        url=f"{base_url}/params?keyword=test",
+        headers={"x-demo": "session-params"},
+        timeout=5,
+    ))
+    assert_equal(params_resp.json()["x_demo"], "session-params", "SessionParams headers")
+
+    jsonp_resp = request.get(f"{base_url}/jsonp", timeout=5)
+    assert_equal(jsonp_resp.jsonp()["type"], "jsonp", "jsonp parser")
+
+    retry_state = {"count": 0}
+
+    def eventually_done() -> str | None:
+        retry_state["count"] += 1
+        return "done" if retry_state["count"] == 2 else None
+
+    assert_equal(
+        biz.safe_retry_until_done(eventually_done, retries=3, delay=0),
+        "done",
+        "safe_retry_until_done",
+    )
+
+    headers = Headers({"Cookie": "a=1; b=2"})
+    assert_equal(headers["cookie"], "a=1; b=2", "Headers case insensitive")
+    assert_equal(headers.cookie(as_dict=True), {"a": "1", "b": "2"}, "Headers.cookie")
+
+    print("All demo tests passed.")
+    print(f"GET: {get_resp.json()}")
+    print(f"POST: {post_resp.json()}")
+    print(f"JSONP: {jsonp_resp.jsonp()}")
+
+
+if __name__ == "__main__":
     demo()
-
-    # Tm().crawl_response()

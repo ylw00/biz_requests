@@ -14,7 +14,10 @@ from dataclasses import dataclass, field
 from base64 import b64decode
 from typing import Optional, Union, List, Dict
 
-from tools.wrapper import Wrapper
+try:
+    from .wrapper import Wrapper
+except ImportError:
+    from tools.wrapper import Wrapper
 
 __content2df: Optional['Content2df'] = None
 

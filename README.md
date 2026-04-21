@@ -1,126 +1,265 @@
 # BizRequests
 
-requests的方法的拓展和重写，主打一个偷懒
+`BizRequests` 是一个面向工作脚本的同步 HTTP 请求封装库，调用风格尽量贴近 `requests`，在常见业务取数场景里减少重复代码。
 
-github: `https://github.com/ylw00/biz_requests`
+当前版本已经将底层请求内核替换为 `curl_cffi.requests`，上层 API、调用方式、返回对象辅助方法和异常日志行为保持兼容，同时保留浏览器指纹伪装、JA3/Akamai 指纹和 HTTP/2 能力。
 
-vx: y278369368
+## 特性
 
-就是想偷懒, 不用写乱七八糟的导包(之前写的删了,太烂了)
+- `Session.get/post/request` 保持 requests 风格调用。
+- 请求级和全局级 `retries/delay/encoding/headers/http2` 配置。
+- 基于 `curl_cffi` 的 `impersonate/ja3/akamai/extra_fp/http_version` 指纹能力。
+- `BizResponse.json()` 解析失败时自动记录 `response.text`。
+- `BizResponse.jsonp()` 支持 JSONP 返回值解析。
+- `BizResponse.dataframe()` 支持二进制报表和 base64 报表转 `pandas.DataFrame`。
+- `BizResponse.head_scookie()` 直接解析响应头里的 `set-cookie`。
+- `Headers` 忽略 key 大小写，并提供 `copy()`、`cookie()` 辅助方法。
+- `Wrapper.retry_until_done()`、`safe_parse()` 等业务脚本常用装饰器。
+- 可选 MySQL/SQLAlchemy 工具封装。
 
-已经自用了一段时间才敢发出来玩, 感觉也还可以,确实轻松了点
+## 安装依赖
 
-
-## 胡乱写的,可能只适合***业务(我不是爬虫)
-- 菜菜菜菜菜菜菜菜菜菜菜菜菜菜菜菜菜菜菜菜菜
-
-## 1. 依赖
-
-```text
-python==3.9.9
-requests==2.31.0
-
-这里主要是搞mysql连接(目前设计的还有点臃肿, 后续会逐渐的做优化)
-SQLAlchemy==1.4.7
-pandas==1.3.5
-
-loguru==0.7.2
+```bash
+pip install -r requirements.txt
 ```
 
-## 2. 需求
+核心依赖：
 
-- `请求效率要求不高`,  甚至还需要sleep, 如果需要效率也没必要使用同步库
-- `捕获异常返回值`, 异常情况需要打印或者保存到日志文件, 便于后续代码的分析优化
-- `二进制报表(dataframe)`, 经常会导出一些二进制报表, 或者是base64类型
-- 场景示例: 商家后台取数需求
+```text
+python>=3.9
+curl_cffi>=0.7.0
+loguru>=0.7.2
+pandas>=1.3.5
+SQLAlchemy>=1.4.7
+```
 
-## 3. 新增方法
+如果只使用 HTTP 请求能力，数据库相关依赖可以按需安装。
 
-- **(请求/响应)**
-  - 重写`requests.request`: 新增 `retries, delay` 参数,增加重试功能
-  - 重写`response.json`: json序列化, 失败则自动日志输出 response.text
-  - 新增`response.jsonp`: json序列化jsonp类型返回值, 失败则自动日志输出 response.text
-  - 新增`response.dataframe`: 二进制报表(返回dataframe), 参数: `c_type, non2none` ;同理, 如果失败则自动日志输出 response.text
-  - 新增`response.head_scookie`: 返回['set-cookie'], 参数 `as_dict`: 返回值类型
-  - 新增`response.set_encoding`: 设置编码并返回`self`, 支持 response.set_encoding().json()
+## 快速开始
 
-
-- **参数c_type: 六种模式**
-  - `xlsx_content`:  字节转xlsx
-  - `xlsx_zip`:      字节[压缩包]转xlsx
-  - `xlsx_base64`:   base64转xlsx
-  - `csv_content`:   字节转csv
-  - `csv_zip`:       字节[压缩包]转csv
-  - `csv_base64`:    base64转csv
-
-
-- **Headers[重写]**
-  - 忽略大小写敏感
-  - 重写`copy`: 参数state_stay: 是否保持当前的key状态; value: 覆盖或新增key
-
-
-- **Wrapper[装饰器工具]**
-  - `add_method_desc`: 给函数增加 desc 属性, 我一般用来写注释(菜菜菜)
-  - `retry_until_done`: 用来重试直到成功(不为None); 场景1: 报表导出
-
-
-- **(操作/用户)**
-  - 只能`继承`去使用BizRequest
-  - `init_request`: 初始化session, 全局配置`retries, delay, headers`
-  - `init_engine`: 初始化`mysql`, 目前有点臃肿, 后续再去优化吧
-  - `safe_parse`: 解析：self.safe_parse(lambda: n: n['data'], response), 失败则自动日志输出 `函数传参`
-
-## 4. 代码
-
-
+`BizRequest` 不能直接实例化，需要继承后使用。
 
 ```python
 from biz_request import BizRequest
 
-# 请求方式跟requests一摸一样
-biz_req = BizRequest()  # 不能直接使用, 必须要继承, 这里只是做一个demo
-biz_req.init_request().init_engine()  # 设置seeion, mysql连接
 
-# 请求新增两个参数  delay=3, retries=2 如果 delay=0 则不重试 默认不重试
-_ = biz_req.request.get('').text
-biz_req.request.get('').json()  # 报错则自动日志输出.text文本
-biz_req.request.get('').jsonp()  # 报错则自动日志输出.text文本
+class DemoRequest(BizRequest):
+    def __init__(self) -> None:
+        super().__init__()
+        self.init_request(
+            retries=2,
+            delay=1,
+            headers={"user-agent": "Mozilla/5.0"},
+            http2=True,
+            impersonate="chrome",
+        )
 
-# 支持六种模式  xlsx_content | xlsx_zip | xlsx_base64 | csv_content | csv_zip | csv_base64
-biz_req.request.get('').dataframe()  # 报错则自动日志输出.text文本
 
-# ----------------------------------------------------------------------------------------------
+biz = DemoRequest()
+resp = biz.request.get("https://example.com", timeout=10)
 
-from biz_request import BizRequest, Wrapper, Headers
+print(resp.status_code)
+print(resp.text)
+print(resp.headers)
+```
 
-headers = Headers()
-# Headers【大写小写不敏感】; 并增加了方法, copy, cookie 
+## 请求 API
 
-# 解析失败的话, 则自动日志输出参数
-biz_req = BizRequest()  # 不能直接使用, 必须要继承, 这里只是做一个demo
-biz_req.safe_parse()  # 参数1: 回调解析response函数;  *args, **kwargs: 回调函数参数 
+### 创建请求会话
 
-# 适用于等待报表导出, 直至成功
-@Wrapper.retry_until_done(retries=5, delay=6, desc='...报表导出失败')
-def demo():
+```python
+self.init_request(
+    retries=0,
+    delay=0,
+    encoding=None,
+    headers=None,
+    http2=False,
+    impersonate=None,
+    ja3=None,
+    akamai=None,
+    extra_fp=None,
+)
+```
+
+参数说明：
+
+- `retries`: 默认重试次数。
+- `delay`: 默认重试间隔，单位秒。
+- `encoding`: 默认响应文本编码。
+- `headers`: 默认请求头，会被封装为 `Headers`。
+- `http2`: 是否默认启用 HTTP/2。
+- `impersonate`: curl_cffi 浏览器指纹，例如 `"chrome"`。
+- `ja3`: 自定义 JA3 TLS 指纹。
+- `akamai`: 自定义 Akamai HTTP/2 指纹。
+- `extra_fp`: curl_cffi 的额外指纹配置。
+
+### 发起请求
+
+```python
+resp = biz.request.get(
+    "https://example.com/api",
+    params={"page": 1},
+    headers={"accept": "application/json"},
+    timeout=10,
+    retries=2,
+    delay=1,
+)
+
+resp = biz.request.post(
+    "https://example.com/api",
+    json={"name": "biz_requests"},
+    timeout=10,
+)
+```
+
+也支持 `SessionParams`：
+
+```python
+from request.params import MethodEnum, SessionParams
+
+resp = biz.request.request(SessionParams(
+    method=MethodEnum.GET,
+    url="https://example.com/api",
+    headers={"accept": "application/json"},
+    timeout=10,
+))
+```
+
+## 响应 API
+
+### JSON
+
+```python
+data = resp.json()
+```
+
+解析失败会自动记录当前 `response.text`，再抛出原异常。
+
+### JSONP
+
+```python
+data = resp.jsonp()
+```
+
+支持类似 `callback({"ok": true})` 的返回值。
+
+### Cookie
+
+```python
+cookie_dict = resp.head_scookie()
+cookie_text = resp.head_scookie(as_dict=False)
+```
+
+默认返回解析后的字典。
+
+### 编码
+
+```python
+data = resp.set_encoding("utf-8").json()
+```
+
+`set_encoding()` 返回 `self`，支持链式调用。
+
+### DataFrame
+
+```python
+df = resp.dataframe("xlsx_content")
+df = resp.dataframe("csv_base64", encoding="utf-8", non2none=True)
+```
+
+支持的 `c_type`：
+
+- `xlsx_content`: 字节转 xlsx
+- `xlsx_zip`: zip 字节包转 xlsx
+- `xlsx_base64`: base64 转 xlsx
+- `csv_content`: 字节转 csv
+- `csv_zip`: zip 字节包转 csv
+- `csv_base64`: base64 转 csv
+
+## Headers
+
+`Headers` 对 key 大小写不敏感。
+
+```python
+from biz_request import Headers
+
+headers = Headers({"User-Agent": "Mozilla/5.0", "Cookie": "a=1; b=2"})
+
+print(headers["user-agent"])
+print(headers["USER-AGENT"])
+print(headers.cookie(as_dict=True))
+
+new_headers = headers.copy(value={"accept": "application/json"})
+```
+
+## Wrapper 工具
+
+```python
+from biz_request import Wrapper
+
+
+@Wrapper.retry_until_done(retries=5, delay=6, desc="报表导出")
+def wait_report():
     ...
 ```
 
-## 5. 拓展
-```text
-response.py  # 新增返回值类型
-biz_requests.py  # 加入业务函数封装
+`BizRequest` 也提供了两个静态方法：
+
+```python
+result = biz.safe_retry_until_done(callback_func, retries=3, delay=3)
+result = biz.safe_parse(callback_func, response)
 ```
 
-## 6. 菜菜菜
+## Demo
 
-```text
-1, 原本想使用 `from hyper.contrib import HTTP20Adapter` 使得 requests 支持 http2 请求, 但是好像并不理想, 就放弃了  `http1.py`
+运行本地 demo：
 
-2, 可以试试通过适配器 加入简单的 tls/ja3 指纹算法
+```bash
+python demo.py
 ```
 
-## 7. 完整demo 见demo.py
+当前 `demo.py` 使用本地 `HTTPServer`，不依赖外网，覆盖：
+
+- `BizRequest` 子类初始化
+- `Session.get/post/request`
+- `SessionParams + MethodEnum`
+- 默认 headers 透传
+- `BizResponse.json/jsonp/head_scookie`
+- `Headers` 大小写兼容和 cookie 解析
+- `safe_retry_until_done`
+
+成功输出示例：
+
 ```text
-菜菜菜
+All demo tests passed.
+GET: {'ok': True, 'method': 'GET', 'path': '/json', 'x_demo': 'biz_requests'}
+POST: {'ok': True, 'method': 'POST', 'body': '{"name":"curl_cffi"}'}
+JSONP: {'ok': True, 'type': 'jsonp'}
+```
+
+## 2026-04-21 更新
+
+- 底层请求内核从 `requests` 替换为 `curl_cffi.requests`。
+- 移除请求链路对 `requests.HTTPAdapter` 的依赖。
+- 新增 `curl_cffi` 指纹参数透传：`impersonate`、`ja3`、`akamai`、`extra_fp`。
+- `http2=True` 时默认使用 `CurlHttpVersion.V2_0`。
+- 保留原 `BizResponse` 辅助方法和返回格式。
+- 保留原 `BizRequest`、`Session`、`Headers`、`Wrapper`、`CookieTools` 对外导入方式。
+- 修正包导入和旧式脚本导入兼容性。
+- 新增 `requirements.txt`。
+- 将 `demo.py` 改为稳定的本地回归测试脚本。
+
+## 项目结构
+
+```text
+biz_request.py          # 业务入口基类
+request/session.py      # curl_cffi 请求会话封装
+request/response.py     # BizResponse 响应封装
+request/headers.py      # Headers 封装
+request/params.py       # SessionParams / MethodEnum
+tools/wrapper.py        # 重试、日志装饰器
+tools/dataframe.py      # 报表内容转 DataFrame
+tools/cookies.py        # Cookie 工具
+db_engine/              # 可选数据库工具
+demo.py                 # 本地回归测试
 ```

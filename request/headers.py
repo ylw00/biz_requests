@@ -1,58 +1,57 @@
 # -*- coding: UTF-8 -*-
-# @author: ylw
-# @file: headers
-# @time: 2024/12/9
-# @desc:
-# import sys
-# import os
-from collections import OrderedDict
-from typing import Optional, Union
+from __future__ import annotations
 
-from tools.cookies import CookieTools
+from collections import OrderedDict
+from typing import Any, Dict, Optional, Union
+
+try:
+    from ..tools.cookies import CookieTools
+except ImportError:
+    from tools.cookies import CookieTools
 
 
 # F_PATH = os.path.dirname(__file__)
 # sys.path.append(os.path.join(F_PATH, '..'))
 # sys.path.append(os.path.join(F_PATH, '../..'))
 
-class Headers(OrderedDict):
+class Headers(OrderedDict[str, Any]):
     __default_head = {
         "accept": "*/*",
         "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
     }
 
-    def __init__(self, headers: Optional[dict] = None, **kwargs):
+    def __init__(self, headers: Optional[dict] = None, **kwargs: Any):
         _headers = {k.lower(): v for k, v in headers.items()} if isinstance(headers, dict) else {}
         _kwargs = {k.lower(): v for k, v in kwargs.items()}
         _headers = {**self.__default_head, **_headers, **_kwargs}
         super(Headers, self).__init__(**_headers)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return repr(dict(self))  # 返回字典的字符串表示
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(dict(self))  # 返回字典的字符串表示
 
-    def __getitem__(self, key: str):
+    def __getitem__(self, key: str) -> Any:
         key = key.lower()
         return super(Headers, self).get(key)
 
-    def __setitem__(self, key: str, value):
+    def __setitem__(self, key: str, value: Any) -> None:
         key = key.lower()
         return super(Headers, self).__setitem__(key, value)
 
-    def __delitem__(self, key):
+    def __delitem__(self, key: str) -> bool:
         try:
             super(Headers, self).__delitem__(key.lower())
             return True
         except KeyError:
             return False
 
-    def get(self, __key: str):
+    def get(self, __key: str, default: Any = None) -> Any:
         __key = __key.lower()
-        return super(Headers, self).get(__key)
+        return super(Headers, self).get(__key, default)
 
-    def update(self, __m: dict, **kwargs) -> 'Headers':
+    def update(self, __m: dict, **kwargs: Any) -> 'Headers':
         if not isinstance(__m, dict):
             return self
 
@@ -65,7 +64,7 @@ class Headers(OrderedDict):
         super(Headers, self).update(m, **kwargs)
         return self
 
-    def copy(self: 'Headers', **kwargs) -> 'Headers':
+    def copy(self: 'Headers', **kwargs: Any) -> 'Headers':
         """
         **kwargs:
             state_stay: bools; 默认保存当前的字段状态
@@ -76,7 +75,7 @@ class Headers(OrderedDict):
         _d.update({k.lower(): v for k, v in kwargs.get('value', {}).items()})
         return Headers(_d)
 
-    def cookie(self, as_dict=False) -> Union[str, dict, None]:
+    def cookie(self, as_dict: bool = False) -> Union[str, Dict[str, str], None]:
         cookie: Optional[str] = self.get('cookie')
         if as_dict is False:
             return cookie
